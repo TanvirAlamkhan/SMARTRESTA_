@@ -2688,9 +2688,9 @@ async function loadProductCatalog() {
           <td><span class="badge ${p.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">${p.status}</span></td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="openModifiersModal(${p.id}, '${p.name}')">Modifiers (${p.modifier_count || 0})</button>
-            ${window.CURRENT_USER_ROLE && ['admin','system administrator','manager','branch manager'].includes(window.CURRENT_USER_ROLE.toLowerCase()) ? `
-            <button class="btn btn-warning btn-sm" onclick="openEditProductModal(${p.id}, '${p.name.replace(/'/g,\')}', '${p.category_id}', '${p.price}', '${p.sku || ''}', '${(p.short_description||'').replace(/'/g,\'')}', '${p.image_url||''}', '${p.default_station_id||''}', '${p.is_available ? 1:0}')" style="margin-left:4px;">✏️ Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteProductAction(${p.id}, '${p.name.replace(/'/g,\'')}')" style="margin-left:4px;">🗑️ Delete</button>
+            ${window.CURRENT_USER_ROLE && (window.CURRENT_USER_ROLE.toLowerCase().includes('admin') || window.CURRENT_USER_ROLE.toLowerCase().includes('manager')) ? `
+            <button class="btn btn-warning btn-sm" onclick="openEditProductModal(${p.id}, '${p.name.replace(/'/g,'\\')}', '${p.category_id}', '${p.price}', '${p.sku || ''}', '${(p.short_description||'').replace(/'/g,'\\'')}', '${p.image_url||''}', '${p.default_station_id||''}', '${p.is_available ? 1:0}')" style="margin-left:4px;">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteProductAction(${p.id}, '${p.name.replace(/'/g,'\\'')}')" style="margin-left:4px;">🗑️ Delete</button>
             ` : ''}
           </td>
         </tr>
@@ -3285,40 +3285,46 @@ window.CURRENT_USER_ROLE = "<?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8')
 document.addEventListener('DOMContentLoaded', () => {
   const roleAllowedViews = {
     'admin': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
-    'system administrator': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
-    'manager': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
-    'branch manager': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
-    'reception': ['tables-view', 'pos-view', 'kds-view', 'payments-view', 'crm-view'],
-    'receptionist': ['tables-view', 'pos-view', 'kds-view', 'payments-view', 'crm-view'],
-    'cashier': ['tables-view', 'pos-view', 'kds-view', 'payments-view', 'crm-view'],
-    'waiter': ['pos-view', 'tables-view', 'menu-view', 'payments-view', 'payouts-view'],
-    'head waiter': ['pos-view', 'tables-view', 'menu-view', 'payments-view', 'payouts-view'],
-    'kitchen': ['kds-view', 'routing-view', 'inventory-view'],
-    'chef': ['kds-view', 'routing-view', 'inventory-view'],
-    'head chef': ['kds-view', 'routing-view', 'inventory-view']
-  };
+  const ALL_VIEWS = ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'];
 
-  const userRoleKey = window.CURRENT_USER_ROLE.toLowerCase();
+  // ── Priority-based role resolution (works regardless of exact DB role name) ──
+  // Admin / Manager → full access to everything
+  // Reception / Cashier → customer-facing + payments
+  // Waiter → POS + tables + payments
+  // Kitchen / Chef → KDS + routing + inventory
+  // Default (unknown) → POS + tables (safe minimal set)
+  function resolveRoleAccess(roleStr) {
+    const r = (roleStr || '').toLowerCase().trim();
 
-  // Determine allowed views strictly by role. Unknown roles get minimal safe defaults.
-  let allowedList = roleAllowedViews[userRoleKey];
-  if (!allowedList) {
-    // Try partial key matching for composite role names
-    const knownKeys = Object.keys(roleAllowedViews);
-    const matched = knownKeys.find(k => userRoleKey.includes(k) || k.includes(userRoleKey));
-    allowedList = matched ? roleAllowedViews[matched] : ['pos-view', 'tables-view'];
+    // ADMIN / MANAGER (full access) — catches: admin, system administrator, manager, branch manager, restaurant manager, general manager, head manager etc.
+    if (r.includes('admin') || r.includes('manager')) {
+      return { views: ALL_VIEWS, isFullAccess: true };
+    }
+    // KITCHEN / CHEF
+    if (r.includes('kitchen') || r.includes('chef') || r.includes('cook')) {
+      return { views: ['kds-view', 'routing-view', 'inventory-view'], isFullAccess: false };
+    }
+    // RECEPTION / CASHIER / FRONT DESK
+    if (r.includes('reception') || r.includes('cashier') || r.includes('front')) {
+      return { views: ['tables-view', 'pos-view', 'kds-view', 'payments-view', 'crm-view'], isFullAccess: false };
+    }
+    // WAITER / SERVER
+    if (r.includes('waiter') || r.includes('server') || r.includes('steward')) {
+      return { views: ['pos-view', 'tables-view', 'menu-view', 'payments-view', 'payouts-view'], isFullAccess: false };
+    }
+    // Default: POS + Tables
+    return { views: ['pos-view', 'tables-view'], isFullAccess: false };
   }
+
+  const userRoleKey = window.CURRENT_USER_ROLE || '';
+  const { views: allowedList, isFullAccess } = resolveRoleAccess(userRoleKey);
 
   // Filter sidebar navigation links according to role permissions
   document.querySelectorAll('.sidebar-nav a.nav-item').forEach(link => {
     const href = link.getAttribute('href');
     if (href && href.startsWith('#')) {
       const viewId = href.replace('#', '');
-      if (!allowedList.includes(viewId)) {
-        link.style.display = 'none';
-      } else {
-        link.style.display = 'flex';
-      }
+      link.style.display = allowedList.includes(viewId) ? 'flex' : 'none';
     }
   });
 
@@ -3327,22 +3333,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const targetNavLink = document.querySelector(`.sidebar-nav a[href="#${initialView}"]`);
   switchRoleView(initialView, targetNavLink);
 
-  // Only load admin-specific data for admin/manager roles
-  const isAdminUser = allowedList.includes('admin-view');
-
-  if (isAdminUser) {
-    try {
-      if (typeof loadActiveOrders === 'function') loadActiveOrders();
-    } catch (err) {
-      console.log('Active orders initial load skipped:', err);
-    }
-    try {
-      if (typeof loadWaiterMatrix === 'function') loadWaiterMatrix();
-    } catch (err) {
-      console.log('Waiter matrix initial load skipped:', err);
-    }
+  // Only load admin/manager data if full access
+  if (isFullAccess) {
+    try { if (typeof loadActiveOrders === 'function') loadActiveOrders(); } catch (e) {}
+    try { if (typeof loadWaiterMatrix === 'function') loadWaiterMatrix(); } catch (e) {}
   }
 });
+
 
 // ==========================================
 // POS Catalog & Table Selector
@@ -3389,7 +3386,9 @@ function renderPOSGrid(products) {
   const grid = document.getElementById('pos-product-grid');
   if (!grid) return;
 
-  const isAdminRole = window.CURRENT_USER_ROLE && ['admin','system administrator','manager','branch manager'].includes(window.CURRENT_USER_ROLE.toLowerCase());
+  const isAdminRole = window.CURRENT_USER_ROLE &&
+    (window.CURRENT_USER_ROLE.toLowerCase().includes('admin') || window.CURRENT_USER_ROLE.toLowerCase().includes('manager'));
+
 
   if (!products || products.length === 0) {
     grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);"><div style="font-size:2.5rem; margin-bottom:8px;">🍽️</div><p>No items found in this category.</p></div>`;
