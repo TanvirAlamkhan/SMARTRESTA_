@@ -30,7 +30,7 @@ Initial System Administrator credentials in local MySQL (`smartresta_db`):
 
 | Account | Email | Password | Role |
 | :--- | :--- | :--- | :--- |
-| **System Administrator** | `admin@smartresta.com` | `Admin@SMARTRESTA2026!` | `admin` (Full System Access) |
+| **System Administrator** | `admin@smartresta.com` | `amer25` | `admin` (Full System Access) |
 
 > **Resetting Admin Account**:
 > To reset or re-bootstrap the admin credentials, run:

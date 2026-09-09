@@ -26,7 +26,7 @@ Once the server is running, navigate to any of the following URLs in your browse
 
 | Role | Email | Password |
 |---|---|---|
-| **System Administrator** | `admin@smartresta.com` | `Admin@SMARTRESTA2026!` |
+| **System Administrator** | `admin@smartresta.com` | `amer25` |
 
 > **To Reset Admin Credentials**:
 > ```powershell

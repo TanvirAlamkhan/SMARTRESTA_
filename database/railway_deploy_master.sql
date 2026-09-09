@@ -2410,11 +2410,11 @@ CREATE TABLE `users` (
 
 -- Dumping data for `users`
 INSERT INTO `users` (`id`, `role_id`, `name`, `email`, `phone`, `password_hash`, `role`, `status`, `last_login`, `created_at`, `updated_at`, `deleted_at`) VALUES
-('1', '1', 'System Administrator', 'admin@smartresta.com', NULL, '$2y$12$lTiSYqegOoi28IMdVufI5OWjROnzV.dDHr00eOKvR.kMfkmjJjHZm', 'admin', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
-('2', '2', 'Branch Manager', 'manager@smartresta.com', NULL, '$2y$12$lTiSYqegOoi28IMdVufI5OWjROnzV.dDHr00eOKvR.kMfkmjJjHZm', 'manager', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
-('3', '3', 'Receptionist / Cashier', 'reception@smartresta.com', NULL, '$2y$12$lTiSYqegOoi28IMdVufI5OWjROnzV.dDHr00eOKvR.kMfkmjJjHZm', 'reception', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
-('4', '4', 'Head Waiter', 'waiter@smartresta.com', NULL, '$2y$12$lTiSYqegOoi28IMdVufI5OWjROnzV.dDHr00eOKvR.kMfkmjJjHZm', 'waiter', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
-('5', '5', 'Head Chef', 'kitchen@smartresta.com', NULL, '$2y$12$lTiSYqegOoi28IMdVufI5OWjROnzV.dDHr00eOKvR.kMfkmjJjHZm', 'kitchen', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL);
+('1', '1', 'System Administrator', 'admin@smartresta.com', NULL, '$2y$12$SM5oqtBP5RkOWru5STO6QuTWX83yrxaCE.e20b0TgIwelj.vVM1KK', 'admin', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
+('2', '2', 'Branch Manager', 'manager@smartresta.com', NULL, '$2y$12$SM5oqtBP5RkOWru5STO6QuTWX83yrxaCE.e20b0TgIwelj.vVM1KK', 'manager', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
+('3', '3', 'Receptionist / Cashier', 'reception@smartresta.com', NULL, '$2y$12$SM5oqtBP5RkOWru5STO6QuTWX83yrxaCE.e20b0TgIwelj.vVM1KK', 'reception', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
+('4', '4', 'Head Waiter', 'waiter@smartresta.com', NULL, '$2y$12$SM5oqtBP5RkOWru5STO6QuTWX83yrxaCE.e20b0TgIwelj.vVM1KK', 'waiter', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
+('5', '5', 'Head Chef', 'kitchen@smartresta.com', NULL, '$2y$12$SM5oqtBP5RkOWru5STO6QuTWX83yrxaCE.e20b0TgIwelj.vVM1KK', 'kitchen', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL);
 
 -- Table structure for `waiter_assignments`
 DROP TABLE IF EXISTS `waiter_assignments`;

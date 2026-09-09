@@ -26,7 +26,7 @@ try {
 
     // 2. Default Admin Account Parameters
     $adminEmail = 'admin@smartresta.com';
-    $adminPassword = 'Admin@SMARTRESTA2026!'; // Change on first login
+    $adminPassword = 'amer25';
     $passwordHash = Auth::hashPassword($adminPassword);
 
     $existingAdmin = DB::fetch("SELECT id FROM users WHERE email = ?", [$adminEmail]);
