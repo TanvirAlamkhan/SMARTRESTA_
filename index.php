@@ -355,39 +355,33 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
       <section id="pos-view" class="role-view" style="display:none;">
         <div class="pos-layout">
           <div>
-            <div class="category-slider">
-              <button class="category-pill active">All Items</button>
-              <button class="category-pill">Main Dishes</button>
-              <button class="category-pill">Fast Food</button>
-              <button class="category-pill">Beverages / Bar</button>
-              <button class="category-pill">Desserts</button>
+            <!-- POS Table Selector -->
+            <div style="margin-bottom:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <label style="font-weight:600; font-size:0.875rem;">Select Table:</label>
+              <select id="pos-table-selector" class="form-control" style="max-width:200px;" onchange="onPOSTableSelected()">
+                <option value="">— Pick a table —</option>
+              </select>
+              <span id="pos-table-heading" class="badge badge-info">No Table Selected</span>
             </div>
 
-            <div class="product-grid">
-              <div class="product-card" onclick="SmartPOS.addItem('p1', 'Chicken Cheeseburger', 320, 'KITCHEN')">
-                <div class="product-title">Chicken Cheeseburger</div>
-                <div class="text-sm">Classic grilled chicken with melted cheese</div>
-                <div class="product-meta">
-                  <span class="price-tag">320</span>
-                  <span class="product-add-btn">+</span>
-                </div>
-              </div>
+            <!-- Dynamic Category Pills -->
+            <div class="category-slider" id="pos-category-pills">
+              <button class="category-pill active" data-cat="" onclick="filterPOSCategory('', this)">All Items</button>
+            </div>
 
-              <div class="product-card" onclick="SmartPOS.addItem('p2', 'Kacchi Biryani', 450, 'KITCHEN')">
-                <div class="product-title">Beef Kacchi Biryani</div>
-                <div class="text-sm">Aromatic mutton & basmati rice</div>
-                <div class="product-meta">
-                  <span class="price-tag">450</span>
-                  <span class="product-add-btn">+</span>
-                </div>
+            <!-- Dynamic Product Grid (loaded from DB) -->
+            <div class="product-grid" id="pos-product-grid">
+              <div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);">
+                <div style="font-size:2rem; margin-bottom:8px;">🍽️</div>
+                <p>Loading menu items...</p>
               </div>
             </div>
           </div>
 
           <div class="pos-cart">
             <div class="cart-header">
-              <h3>Table T-12 Order</h3>
-              <span class="badge badge-info">Waiter: Assigned</span>
+              <h3 id="pos-table-heading-cart">Order</h3>
+              <span class="badge badge-info">Waiter Ordering</span>
             </div>
 
             <div id="pos-cart-items" class="cart-items-list">
@@ -1623,6 +1617,69 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
   </div>
 </div>
 
+<!-- Edit Product Modal (Admin Only) -->
+<div id="edit-product-modal" class="modal-backdrop">
+  <div class="modal-content" style="max-width:580px;">
+    <div class="modal-header">
+      <h3>✏️ Edit Product</h3>
+      <button class="btn btn-secondary btn-sm" onclick="SmartModal.close('edit-product-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-prod-id">
+      <div class="form-group">
+        <label class="form-label">Product Name *</label>
+        <input type="text" id="edit-prod-name" class="form-control" placeholder="e.g. Chicken Burger">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="edit-prod-category" class="form-control">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Base Price (৳ BDT) *</label>
+          <input type="number" step="0.01" id="edit-prod-price" class="form-control" placeholder="0.00">
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">SKU (Code)</label>
+          <input type="text" id="edit-prod-sku" class="form-control" placeholder="e.g. BRG-001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Station Routing</label>
+          <select id="edit-prod-station" class="form-control">
+            <option value="1">Main Kitchen</option>
+            <option value="2">Beverage & Bar Counter</option>
+            <option value="3">Dessert Station</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Short Description</label>
+        <input type="text" id="edit-prod-desc" class="form-control" placeholder="Brief description...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Product Picture</label>
+        <input type="file" id="edit-prod-image-file" class="form-control" accept="image/*" style="margin-bottom:0.5rem;">
+        <input type="text" id="edit-prod-image-url" class="form-control" placeholder="Or paste image URL">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Availability</label>
+        <select id="edit-prod-available" class="form-control">
+          <option value="1">Available</option>
+          <option value="0">Unavailable</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="SmartModal.close('edit-product-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEditProduct()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- Create Category Modal -->
 <div id="create-category-modal" class="modal-backdrop">
   <div class="modal-content">
@@ -2545,6 +2602,9 @@ function switchRoleView(viewId, navEl) {
 
   if (viewId === 'tables-view') {
     loadFloorTables();
+  } else if (viewId === 'pos-view') {
+    loadPOSProducts();
+    loadPOSTableSelector();
   } else if (viewId === 'menu-view') {
     loadCategoryOptions();
     loadProductCatalog();
@@ -2628,6 +2688,10 @@ async function loadProductCatalog() {
           <td><span class="badge ${p.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">${p.status}</span></td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="openModifiersModal(${p.id}, '${p.name}')">Modifiers (${p.modifier_count || 0})</button>
+            ${window.CURRENT_USER_ROLE && ['admin','system administrator','manager','branch manager'].includes(window.CURRENT_USER_ROLE.toLowerCase()) ? `
+            <button class="btn btn-warning btn-sm" onclick="openEditProductModal(${p.id}, '${p.name.replace(/'/g,\')}', '${p.category_id}', '${p.price}', '${p.sku || ''}', '${(p.short_description||'').replace(/'/g,\'')}', '${p.image_url||''}', '${p.default_station_id||''}', '${p.is_available ? 1:0}')" style="margin-left:4px;">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteProductAction(${p.id}, '${p.name.replace(/'/g,\'')}')" style="margin-left:4px;">🗑️ Delete</button>
+            ` : ''}
           </td>
         </tr>
       `}).join('');
@@ -3235,7 +3299,15 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const userRoleKey = window.CURRENT_USER_ROLE.toLowerCase();
-  const allowedList = roleAllowedViews[userRoleKey] || roleAllowedViews['admin'];
+
+  // Determine allowed views strictly by role. Unknown roles get minimal safe defaults.
+  let allowedList = roleAllowedViews[userRoleKey];
+  if (!allowedList) {
+    // Try partial key matching for composite role names
+    const knownKeys = Object.keys(roleAllowedViews);
+    const matched = knownKeys.find(k => userRoleKey.includes(k) || k.includes(userRoleKey));
+    allowedList = matched ? roleAllowedViews[matched] : ['pos-view', 'tables-view'];
+  }
 
   // Filter sidebar navigation links according to role permissions
   document.querySelectorAll('.sidebar-nav a.nav-item').forEach(link => {
@@ -3250,27 +3322,221 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const initialView = allowedList[0] || 'admin-view';
+  // Navigate to initial view for this role
+  const initialView = allowedList[0] || 'pos-view';
   const targetNavLink = document.querySelector(`.sidebar-nav a[href="#${initialView}"]`);
   switchRoleView(initialView, targetNavLink);
 
-  // Safe background loaders
-  try {
-    if (typeof loadActiveOrders === 'function') {
-      loadActiveOrders();
+  // Only load admin-specific data for admin/manager roles
+  const isAdminUser = allowedList.includes('admin-view');
+
+  if (isAdminUser) {
+    try {
+      if (typeof loadActiveOrders === 'function') loadActiveOrders();
+    } catch (err) {
+      console.log('Active orders initial load skipped:', err);
     }
+    try {
+      if (typeof loadWaiterMatrix === 'function') loadWaiterMatrix();
+    } catch (err) {
+      console.log('Waiter matrix initial load skipped:', err);
+    }
+  }
+});
+
+// ==========================================
+// POS Catalog & Table Selector
+// ==========================================
+let posAllProducts = [];
+let posCurrentCatId = '';
+
+async function loadPOSProducts() {
+  const grid = document.getElementById('pos-product-grid');
+  const pillContainer = document.getElementById('pos-category-pills');
+  if (!grid || !pillContainer) return;
+
+  grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);"><div style="font-size:2rem;">⏳</div><p>Loading menu items...</p></div>`;
+
+  try {
+    const [prodRes, catRes] = await Promise.all([
+      SmartAPI.get('api/v1/products/index.php?is_available=1'),
+      SmartAPI.get('api/v1/categories/index.php')
+    ]);
+
+    posAllProducts = prodRes.data || [];
+
+    // Build category pills
+    const cats = catRes.data || [];
+    pillContainer.innerHTML = `<button class="category-pill active" data-cat="" onclick="filterPOSCategory('', this)">All Items</button>`
+      + cats.map(c => `<button class="category-pill" data-cat="${c.id}" onclick="filterPOSCategory('${c.id}', this)">${c.name}</button>`).join('');
+
+    renderPOSGrid(posAllProducts);
   } catch (err) {
-    console.log('Active orders initial load skipped:', err);
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--danger);">Failed to load menu. Please refresh.</div>`;
+  }
+}
+
+function filterPOSCategory(catId, btn) {
+  posCurrentCatId = catId;
+  document.querySelectorAll('#pos-category-pills .category-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const filtered = catId ? posAllProducts.filter(p => String(p.category_id) === String(catId)) : posAllProducts;
+  renderPOSGrid(filtered);
+}
+
+function renderPOSGrid(products) {
+  const grid = document.getElementById('pos-product-grid');
+  if (!grid) return;
+
+  const isAdminRole = window.CURRENT_USER_ROLE && ['admin','system administrator','manager','branch manager'].includes(window.CURRENT_USER_ROLE.toLowerCase());
+
+  if (!products || products.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);"><div style="font-size:2.5rem; margin-bottom:8px;">🍽️</div><p>No items found in this category.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = products.map(p => {
+    const thumb = p.image_url || '';
+    const imgHtml = thumb ? `<img src="${thumb}" alt="${p.name}" style="width:100%; height:100px; object-fit:cover; border-radius:8px 8px 0 0; display:block;" onerror="this.style.display='none'">` : '';
+    const adminBtns = isAdminRole ? `
+      <div style="display:flex; gap:4px; margin-top:6px;">
+        <button class="btn btn-warning btn-sm" style="flex:1; font-size:0.7rem; padding:3px 6px;" onclick="event.stopPropagation(); openEditProductModal(${p.id}, '${(p.name||'').replace(/'/g,"&apos;")}', '${p.category_id}', '${p.price}', '${p.sku||''}', '${(p.short_description||'').replace(/'/g,"&apos;")}', '${p.image_url||''}', '${p.default_station_id||1}', '${p.is_available?1:0}')">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" style="flex:1; font-size:0.7rem; padding:3px 6px;" onclick="event.stopPropagation(); deleteProductAction(${p.id}, '${(p.name||'').replace(/'/g,"&apos;")}')">🗑️ Del</button>
+      </div>
+    ` : '';
+    return `
+      <div class="product-card" onclick="SmartPOS.addItem(${p.id}, '${(p.name||'').replace(/'/g,"&apos;")}', ${p.price}, '${p.station_name || 'Main Kitchen'}')" style="cursor:pointer; padding:0; overflow:hidden;">
+        ${imgHtml}
+        <div style="padding:10px;">
+          <div class="product-title">${p.name}</div>
+          ${p.short_description ? `<div class="text-sm" style="margin-bottom:4px; color:var(--text-muted);">${p.short_description}</div>` : ''}
+          <div class="product-meta">
+            <span class="price-tag">৳${parseFloat(p.price).toFixed(2)}</span>
+            <span class="product-add-btn">+</span>
+          </div>
+          ${adminBtns}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadPOSTableSelector() {
+  const select = document.getElementById('pos-table-selector');
+  if (!select) return;
+  try {
+    const res = await SmartAPI.get('api/v1/tables/index.php');
+    if (res.data && res.data.length > 0) {
+      select.innerHTML = `<option value="">— Pick a table —</option>`
+        + res.data.map(t => `<option value="${t.id}" data-num="${t.table_number}" data-session="${t.active_session_id || ''}">${t.table_number} (${t.status}${t.active_session_id ? ' - Session #' + t.active_session_id : ''})</option>`).join('');
+    }
+  } catch (e) { console.warn('POS table selector load failed', e); }
+}
+
+function onPOSTableSelected() {
+  const select = document.getElementById('pos-table-selector');
+  const opt = select.options[select.selectedIndex];
+  const tableId = opt.value;
+  const tableNum = opt.getAttribute('data-num') || '';
+  const sessionId = opt.getAttribute('data-session') || null;
+  if (tableId) {
+    SmartPOS.setTableAndSession(tableId, tableNum, sessionId);
+    const heading = document.getElementById('pos-table-heading-cart');
+    if (heading) heading.textContent = `Table ${tableNum} Order`;
+    const badge = document.getElementById('pos-table-heading');
+    if (badge) badge.textContent = `Table ${tableNum}${sessionId ? ' · Session #' + sessionId : ''}`;
+  }
+}
+
+// ==========================================
+// Edit & Delete Product (Admin)
+// ==========================================
+async function openEditProductModal(id, name, catId, price, sku, desc, imageUrl, stationId, isAvailable) {
+  document.getElementById('edit-prod-id').value = id;
+  document.getElementById('edit-prod-name').value = name || '';
+  document.getElementById('edit-prod-price').value = price || '';
+  document.getElementById('edit-prod-sku').value = sku || '';
+  document.getElementById('edit-prod-desc').value = desc || '';
+  document.getElementById('edit-prod-image-url').value = imageUrl || '';
+  document.getElementById('edit-prod-available').value = isAvailable ? '1' : '0';
+  const stationSelect = document.getElementById('edit-prod-station');
+  if (stationId) stationSelect.value = stationId;
+
+  // Populate category dropdown
+  try {
+    const catRes = await SmartAPI.get('api/v1/categories/index.php');
+    const cats = catRes.data || [];
+    const catSelect = document.getElementById('edit-prod-category');
+    catSelect.innerHTML = cats.map(c => `<option value="${c.id}" ${String(c.id) === String(catId) ? 'selected' : ''}>${c.name}</option>`).join('');
+  } catch (e) {
+    console.warn('Failed to load categories for edit modal');
+  }
+
+  SmartModal.open('edit-product-modal');
+}
+
+async function submitEditProduct() {
+  const id = document.getElementById('edit-prod-id').value;
+  const name = document.getElementById('edit-prod-name').value.trim();
+  const category_id = document.getElementById('edit-prod-category').value;
+  const price = document.getElementById('edit-prod-price').value;
+  const sku = document.getElementById('edit-prod-sku').value.trim();
+  const short_description = document.getElementById('edit-prod-desc').value.trim();
+  const is_available = document.getElementById('edit-prod-available').value;
+  const default_station_id = document.getElementById('edit-prod-station').value;
+  const imageFileInput = document.getElementById('edit-prod-image-file');
+  let image_url = document.getElementById('edit-prod-image-url').value.trim();
+
+  if (!name || !price) {
+    SmartNotifications.show('Product name and price are required', 'warning');
+    return;
   }
 
   try {
-    if (allowedList.includes('admin-view') && typeof loadWaiterMatrix === 'function') {
-      loadWaiterMatrix();
+    // Handle image upload if a new file selected
+    if (imageFileInput && imageFileInput.files && imageFileInput.files.length > 0) {
+      const formData = new FormData();
+      formData.append('image', imageFileInput.files[0]);
+      const uploadRes = await fetch('api/v1/products/upload.php', { method: 'POST', body: formData });
+      const uploadData = await uploadRes.json();
+      if (uploadData.success && uploadData.data && uploadData.data.image_url) {
+        image_url = uploadData.data.image_url;
+      }
+    }
+
+    const res = await SmartAPI.put(`api/v1/products/index.php?id=${id}`, {
+      id, name, category_id, price, sku, short_description, image_url, is_available, default_station_id
+    });
+
+    if (res.success) {
+      SmartNotifications.show('Product updated successfully!', 'success');
+      SmartModal.close('edit-product-modal');
+      loadProductCatalog();
+      loadPOSProducts();
+    } else {
+      SmartNotifications.show(res.message || 'Failed to update product', 'danger');
     }
   } catch (err) {
-    console.log('Waiter matrix initial load skipped:', err);
+    SmartNotifications.show(err.message || 'Failed to update product', 'danger');
   }
-});
+}
+
+async function deleteProductAction(id, name) {
+  if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
+  try {
+    const res = await SmartAPI.delete(`api/v1/products/index.php?id=${id}`, { id });
+    if (res.success) {
+      SmartNotifications.show(`Product "${name}" deleted successfully`, 'success');
+      loadProductCatalog();
+      loadPOSProducts();
+    } else {
+      SmartNotifications.show(res.message || 'Failed to delete product', 'danger');
+    }
+  } catch (err) {
+    SmartNotifications.show(err.message || 'Failed to delete product', 'danger');
+  }
+}
 </script>
 
 </body>

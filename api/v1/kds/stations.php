@@ -19,7 +19,7 @@ $userId = $_SESSION['user_id'] ?? 1;
 
 if ($method === 'GET') {
     try {
-        Auth::requirePermission('stations.view');
+        Auth::requirePermissionOrEmpty('stations.view');
         $stations = RoutingEngine::getStations($branchId);
 
         // Attach live ticket counters to each station

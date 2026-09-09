@@ -15,7 +15,7 @@ Auth::requireAuth();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    Auth::requirePermission('orders.view');
+    Auth::requirePermissionOrEmpty('orders.view');
 
     $filters = [];
     if (!empty($_GET['branch_id'])) $filters['branch_id'] = (int)$_GET['branch_id'];

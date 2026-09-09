@@ -19,7 +19,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $db = Database::getConnection();
 
 if ($method === 'GET') {
-    Auth::requirePermission('tables.view');
+    Auth::requirePermissionOrEmpty('tables.view');
     $floorId = !empty($_GET['floor_id']) ? (int)$_GET['floor_id'] : null;
 
     if ($db) {

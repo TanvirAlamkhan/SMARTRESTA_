@@ -215,6 +215,26 @@ class Auth {
         }
     }
 
+    /**
+     * Soft permission check for GET endpoints.
+     * Instead of throwing 403, returns empty data array with success=true.
+     * This prevents JS toast errors when a lower-privilege role visits a section.
+     */
+    public static function requirePermissionOrEmpty($permissionName, $message = null) {
+        self::requireAuth();
+        if (!self::hasPermission($permissionName)) {
+            $msg = $message ?? "You do not have permission to view this data.";
+            Response::json(true, 200, $msg, []);
+        }
+    }
+
+    /**
+     * Returns bool — does not throw. For use in conditional logic.
+     */
+    public static function checkPermission($permissionName) {
+        return self::hasPermission($permissionName);
+    }
+
     public static function logout() {
         self::initSession();
         if (isset($_SESSION['user_id'])) {

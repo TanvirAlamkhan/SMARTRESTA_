@@ -15,7 +15,7 @@ require_once __DIR__ . '/../../../core/Response.php';
 Auth::requireAuth();
 
 try {
-    Auth::requirePermission('waiters.view');
+    Auth::requirePermissionOrEmpty('waiters.view');
     $branchId = isset($_GET['branch_id']) ? (int)$_GET['branch_id'] : 1;
     $startDate = !empty($_GET['start_date']) ? trim($_GET['start_date']) : null;
     $endDate = !empty($_GET['end_date']) ? trim($_GET['end_date']) : null;

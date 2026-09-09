@@ -15,7 +15,7 @@ Auth::requireAuth();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    Auth::requirePermission('categories.view');
+    Auth::requirePermissionOrEmpty('categories.view');
     $menuId = !empty($_GET['menu_id']) ? (int)$_GET['menu_id'] : null;
 
     try {

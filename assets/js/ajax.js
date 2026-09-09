@@ -74,6 +74,11 @@ const SmartAPI = {
 
       if (!response.ok || !data.success) {
         const errMsg = data.message || `API Request Failed (HTTP ${response.status})`;
+        // Don't throw for 403 permission errors — role gating handles this via sidebar
+        if (response.status === 403 || (data.statusCode === 403)) {
+          console.info(`SmartAPI: Permission denied for ${endpoint} — ${errMsg}`);
+          return { success: true, statusCode: 200, data: [], message: 'No access' };
+        }
         throw new Error(errMsg);
       }
 
@@ -83,7 +88,7 @@ const SmartAPI = {
       
       // Do not flood toasts if already redirecting to login
       if (!this.isRedirecting && window.SmartNotifications && typeof window.SmartNotifications.show === 'function') {
-        if (error.message !== 'Authentication required') {
+        if (error.message !== 'Authentication required' && !error.message.includes('Forbidden') && !error.message.includes('permission')) {
           SmartNotifications.show(error.message || 'Network request failed', 'danger');
         }
       }
@@ -103,8 +108,8 @@ const SmartAPI = {
     return this.request(endpoint, { method: 'PUT', body });
   },
 
-  delete(endpoint) {
-    return this.request(endpoint, { method: 'DELETE' });
+  delete(endpoint, body) {
+    return this.request(endpoint, { method: 'DELETE', body: body || null });
   }
 };
 

@@ -270,6 +270,56 @@ class MenuEngine {
         return true;
     }
 
+    public static function updateProduct(int $productId, array $data, int $userId = 1): bool {
+        $db = Database::getConnection();
+        $fields = [];
+        $params = ['id' => $productId];
+
+        if (isset($data['name'])) {
+            $fields[] = 'name = :name';
+            $params['name'] = trim($data['name']);
+        }
+        if (isset($data['price'])) {
+            $fields[] = 'price = :price';
+            $params['price'] = (float)$data['price'];
+        }
+        if (isset($data['category_id'])) {
+            $fields[] = 'category_id = :category_id';
+            $params['category_id'] = (int)$data['category_id'];
+        }
+        if (isset($data['default_station_id'])) {
+            $fields[] = 'default_station_id = :default_station_id';
+            $params['default_station_id'] = (int)$data['default_station_id'];
+        }
+        if (isset($data['short_description'])) {
+            $fields[] = 'short_description = :short_description';
+            $params['short_description'] = trim($data['short_description']);
+        }
+        if (isset($data['image_url'])) {
+            $fields[] = 'image_url = :image_url';
+            $params['image_url'] = trim($data['image_url']);
+        }
+
+        if (empty($fields)) {
+            return false;
+        }
+
+        $sql = "UPDATE products SET " . implode(', ', $fields) . " WHERE id = :id AND deleted_at IS NULL";
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+
+        AuditLogger::log($userId, 'PRODUCT_UPDATED', 'product', $productId, null, $data);
+        return true;
+    }
+
+    public static function deleteProduct(int $productId, int $userId = 1): bool {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("UPDATE products SET deleted_at = NOW(), status = 'INACTIVE' WHERE id = :id");
+        $stmt->execute(['id' => $productId]);
+        AuditLogger::log($userId, 'PRODUCT_DELETED', 'product', $productId);
+        return true;
+    }
+
     // =========================================================================
     // 4. VARIANTS & MODIFIERS
     // =========================================================================

@@ -15,7 +15,7 @@ Auth::requireAuth();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    Auth::requirePermission('products.view');
+    Auth::requirePermissionOrEmpty('products.view');
 
     $filters = [];
     if (!empty($_GET['category_id'])) $filters['category_id'] = (int)$_GET['category_id'];
@@ -40,6 +40,40 @@ if ($method === 'GET') {
         Response::json(true, 201, "Product successfully created", $result);
     } catch (Exception $e) {
         Response::json(false, 422, "Failed to create product: " . $e->getMessage());
+    }
+
+} elseif ($method === 'PUT') {
+    Auth::requirePermission('products.update');
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = isset($_GET['id']) ? (int)$_GET['id'] : (isset($input['id']) ? (int)$input['id'] : null);
+
+    if (!$id) {
+        Response::json(false, 400, "Product ID is required.");
+    }
+
+    try {
+        $userId = Auth::user()['id'] ?? 1;
+        $updated = MenuEngine::updateProduct($id, $input, $userId);
+        Response::json(true, 200, "Product updated successfully", ['id' => $id, 'updated' => $updated]);
+    } catch (Exception $e) {
+        Response::json(false, 500, "Failed to update product: " . $e->getMessage());
+    }
+
+} elseif ($method === 'DELETE') {
+    Auth::requirePermission('products.delete');
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = isset($_GET['id']) ? (int)$_GET['id'] : (isset($input['id']) ? (int)$input['id'] : null);
+
+    if (!$id) {
+        Response::json(false, 400, "Product ID is required for deletion.");
+    }
+
+    try {
+        $userId = Auth::user()['id'] ?? 1;
+        $deleted = MenuEngine::deleteProduct($id, $userId);
+        Response::json(true, 200, "Product deleted successfully", ['id' => $id, 'deleted' => $deleted]);
+    } catch (Exception $e) {
+        Response::json(false, 500, "Failed to delete product: " . $e->getMessage());
     }
 
 } else {

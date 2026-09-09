@@ -18,7 +18,7 @@ $userId = $_SESSION['user_id'] ?? 1;
 
 if ($method === 'GET') {
     try {
-        Auth::requirePermission('kds.view');
+        Auth::requirePermissionOrEmpty('kds.view');
         $stationId = isset($_GET['station_id']) ? (int)$_GET['station_id'] : null;
         $status = $_GET['status'] ?? '';
         $priority = $_GET['priority'] ?? '';
