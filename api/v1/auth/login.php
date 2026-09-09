@@ -44,7 +44,11 @@ try {
 }
 
 // Authenticate via Auth Engine
-$user = Auth::login($email, $password);
+try {
+    $user = Auth::login($email, $password);
+} catch (Exception $e) {
+    Response::json(false, 500, $e->getMessage());
+}
 
 if (!$user) {
     RateLimiter::recordFailedAttempt($email);

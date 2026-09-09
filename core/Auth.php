@@ -47,6 +47,11 @@ class Auth {
     public static function login($email, $password) {
         self::initSession();
 
+        $pdo = Database::getConnection();
+        if (!$pdo) {
+            throw new Exception("Database connection unavailable. Please ensure MySQL service is running in XAMPP or check DB settings.");
+        }
+
         try {
             $user = DB::fetch("
                 SELECT u.id, u.name, u.email, u.password_hash, u.role, u.status, u.role_id,
@@ -57,7 +62,7 @@ class Auth {
             ", [trim($email)]);
         } catch (Exception $e) {
             error_log("Auth Login DB Exception: " . $e->getMessage());
-            return false;
+            throw new Exception("Database error during login: " . $e->getMessage());
         }
 
         if (!$user) {
