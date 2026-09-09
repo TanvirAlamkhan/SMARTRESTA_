@@ -179,8 +179,8 @@ class Auth {
                 Response::json(false, 401, "Authentication required. Please log in.");
             } else {
                 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-                $loginUrl = (strpos($scriptName, '/public/') !== false) ? 'login.php' : 'public/login.php';
-                header("Location: " . $loginUrl);
+                $landingUrl = (strpos($scriptName, '/public/') !== false) ? '../landing.php' : 'landing.php';
+                header("Location: " . $landingUrl);
                 exit;
             }
         }
