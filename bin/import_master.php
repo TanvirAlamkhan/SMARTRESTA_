@@ -32,8 +32,14 @@ try {
     $db->exec($sql);
     $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
+    // Guarantee default staff account passwords match Admin@SMARTRESTA2026!
+    require_once __DIR__ . '/../core/Auth.php';
+    $validHash = Auth::hashPassword('Admin@SMARTRESTA2026!');
+    $db->exec("UPDATE users SET password_hash = '{$validHash}' WHERE email IN ('admin@smartresta.com', 'manager@smartresta.com', 'reception@smartresta.com', 'waiter@smartresta.com', 'kitchen@smartresta.com');");
+
     echo "========================================================================\n";
     echo "SUCCESS: Master database imported cleanly into Railway MySQL!\n";
+    echo "Verified Admin Password: Admin@SMARTRESTA2026!\n";
     echo "========================================================================\n";
 
 } catch (Exception $e) {
