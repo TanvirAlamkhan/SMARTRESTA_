@@ -96,65 +96,65 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
 
     <nav class="sidebar-nav">
       <div class="nav-section-title">OPERATIONS</div>
-      <a href="php/admin.php" class="nav-item active" onclick="switchRoleView('admin', this)">
+      <a href="php/admin.php" class="nav-item active" onclick="switchRoleView('admin', this, event)">
         <span class="nav-icon">📊</span>
         <span>Manager Dashboard</span>
       </a>
-      <a href="php/tables.php" class="nav-item" onclick="switchRoleView('tables', this)">
+      <a href="php/tables.php" class="nav-item" onclick="switchRoleView('tables', this, event)">
         <span class="nav-icon">🪑</span>
         <span>Floors & Dining Tables</span>
       </a>
-      <a href="php/menu.php" class="nav-item" onclick="switchRoleView('menu', this)">
+      <a href="php/menu.php" class="nav-item" onclick="switchRoleView('menu', this, event)">
         <span class="nav-icon">🍔</span>
         <span>Menu & Product Catalog</span>
       </a>
-      <a href="php/pos.php" class="nav-item" onclick="switchRoleView('pos', this)">
+      <a href="php/pos.php" class="nav-item" onclick="switchRoleView('pos', this, event)">
         <span class="nav-icon">💳</span>
         <span>POS & Waiter Ordering</span>
       </a>
-      <a href="php/kds.php" class="nav-item" onclick="switchRoleView('kds', this); SmartKDS.loadKDSGrid();">
+      <a href="php/kds.php" class="nav-item" onclick="switchRoleView('kds', this, event)">
         <span class="nav-icon">🍳</span>
         <span>Kitchen Display (KDS)</span>
       </a>
-      <a href="#routing" class="nav-item" onclick="switchRoleView('routing', this); SmartRouting.loadStationQueue();">
+      <a href="#routing" class="nav-item" onclick="switchRoleView('routing', this, event)">
         <span class="nav-icon">🔀</span>
         <span>Station Routing Engine</span>
       </a>
-      <a href="php/payments.php" class="nav-item" onclick="switchRoleView('payments', this); SmartBilling.loadPaymentHistory();">
+      <a href="php/payments.php" class="nav-item" onclick="switchRoleView('payments', this, event)">
         <span class="nav-icon">💰</span>
         <span>Billing & Payments History</span>
       </a>
-      <a href="#commission-rules" class="nav-item" onclick="switchRoleView('commission-rules', this); SmartCommissions.loadCommissionRules();">
+      <a href="#commission-rules" class="nav-item" onclick="switchRoleView('commission-rules', this, event)">
         <span class="nav-icon">📜</span>
         <span>Commission Rules Engine</span>
       </a>
-      <a href="#commissions-review" class="nav-item" onclick="switchRoleView('commissions-review', this); SmartCommissions.loadCommissionsReview();">
+      <a href="#commissions-review" class="nav-item" onclick="switchRoleView('commissions-review', this, event)">
         <span class="nav-icon">📑</span>
         <span>Commission Review & Approvals</span>
       </a>
-      <a href="#payouts" class="nav-item" onclick="switchRoleView('payouts', this); SmartCommissions.loadPayoutHistory();">
+      <a href="#payouts" class="nav-item" onclick="switchRoleView('payouts', this, event)">
         <span class="nav-icon">💵</span>
         <span>Commission Payout Settlements</span>
       </a>
 
       <div class="nav-section-title" style="margin-top:16px;">ADMIN & ACCESS</div>
-      <a href="php/users.php" class="nav-item" onclick="switchRoleView('users', this)">
+      <a href="php/users.php" class="nav-item" onclick="switchRoleView('users', this, event)">
         <span class="nav-icon">👥</span>
         <span>Users & Staff Roles</span>
       </a>
-      <a href="php/inventory.php" class="nav-item" onclick="switchRoleView('inventory', this); SmartInventory.init();">
+      <a href="php/inventory.php" class="nav-item" onclick="switchRoleView('inventory', this, event)">
         <span class="nav-icon">📦</span>
         <span>Stock & Ingredients</span>
       </a>
-      <a href="php/reports.php" class="nav-item" onclick="switchRoleView('reports', this); SmartReports.loadCurrentTab();">
+      <a href="php/reports.php" class="nav-item" onclick="switchRoleView('reports', this, event)">
         <span class="nav-icon">📈</span>
         <span>Reports & Analytics</span>
       </a>
-      <a href="php/finance.php" class="nav-item" onclick="switchRoleView('finance', this); SmartFinance.init();">
+      <a href="php/finance.php" class="nav-item" onclick="switchRoleView('finance', this, event)">
         <span class="nav-icon">💵</span>
         <span>Finance, Shifts & Day Close</span>
       </a>
-      <a href="php/crm.php" class="nav-item" onclick="switchRoleView('crm', this); SmartCRM.init();">
+      <a href="php/crm.php" class="nav-item" onclick="switchRoleView('crm', this, event)">
         <span class="nav-icon">🤝</span>
         <span>CRM & QR Ordering</span>
       </a>
@@ -1506,14 +1506,21 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
 </div>
 
 <script>
-function switchRoleView(viewId, navEl) {
+function switchRoleView(viewId, navEl, event) {
+  if (event) {
+    try { event.preventDefault(); } catch (e) {}
+  }
   const cleanId = (viewId || 'admin').replace(/-view$/, '');
 
   document.querySelectorAll('.role-view').forEach(view => view.style.display = 'none');
   document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
 
   const target = document.getElementById(cleanId) || document.getElementById(cleanId + '-view');
-  if (target) target.style.display = 'block';
+  if (target) {
+    target.style.display = 'block';
+  } else {
+    console.warn(`Section #${cleanId} not found in DOM`);
+  }
 
   if (navEl) {
     navEl.classList.add('active');
@@ -1521,6 +1528,12 @@ function switchRoleView(viewId, navEl) {
     const link = document.querySelector(`.sidebar-nav a[href*="${cleanId}"]`);
     if (link) link.classList.add('active');
   }
+
+  try {
+    const isSubdir = window.location.pathname.includes('/php/');
+    const targetUrl = isSubdir ? `${cleanId}.php` : `php/${cleanId}.php`;
+    window.history.pushState({ section: cleanId }, '', targetUrl);
+  } catch (e) {}
 
   const titles = {
     'admin': 'Manager Dashboard',
@@ -1570,8 +1583,17 @@ function switchRoleView(viewId, navEl) {
     if (typeof SmartFinance !== 'undefined' && typeof SmartFinance.init === 'function') SmartFinance.init();
   } else if (cleanId === 'crm') {
     if (typeof SmartCRM !== 'undefined' && typeof SmartCRM.init === 'function') SmartCRM.init();
+  } else if (cleanId === 'admin') {
+    if (typeof loadWaiterMatrix === 'function') loadWaiterMatrix();
+    if (typeof loadActiveOrders === 'function') loadActiveOrders();
   }
 }
+
+window.onpopstate = function(e) {
+  const pathMatch = window.location.pathname.match(/\/php\/([a-z0-9_-]+)\.php/i);
+  const targetSection = pathMatch ? pathMatch[1] : (e.state && e.state.section ? e.state.section : 'admin');
+  switchRoleView(targetSection);
+};
 
 async function loadCategoryOptions() {
   try {
