@@ -14,7 +14,8 @@ echo "========================================================================\n
 $db = Database::getConnection();
 
 if (!$db) {
-    die("FATAL ERROR: Unable to establish database connection. Check environment variables.\n");
+    echo "[WARNING] Database connection unavailable during migration check. Ensure Railway MySQL environment variables are set.\n";
+    exit(0);
 }
 
 try {

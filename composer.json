@@ -1,0 +1,16 @@
+{
+    "name": "smartresta/restaurant-os",
+    "description": "SMARTRESTA — Restaurant Operations, POS & Performance OS",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-mysqli": "*",
+        "ext-mbstring": "*",
+        "ext-curl": "*",
+        "ext-openssl": "*",
+        "ext-gd": "*"
+    }
+}
