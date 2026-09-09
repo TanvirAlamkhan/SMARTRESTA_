@@ -14,6 +14,8 @@ Auth::requireAuth();
 
 CSRF::init();
 $csrfToken = CSRF::getToken();
+$currentUser = Auth::user();
+$userRole = strtolower(trim(Auth::role() ?? 'admin'));
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -167,7 +169,7 @@ $csrfToken = CSRF::getToken();
         <button id="mobile-menu-btn" class="btn btn-secondary btn-icon" style="display:none;">☰</button>
         <div>
           <h1 id="view-title">Manager Overview</h1>
-          <span class="text-sm">Branch: Main Outlet | Currency: ৳ (BDT)</span>
+          <span class="text-sm">User: <strong><?= htmlspecialchars($currentUser['name'] ?? 'Staff') ?></strong> (<span class="badge badge-info"><?= htmlspecialchars(strtoupper($userRole)) ?></span>) | Branch: Main Outlet</span>
         </div>
       </div>
 
@@ -3169,7 +3171,28 @@ async function submitCreateStation() {
   }
 }
 
+window.CURRENT_USER_ROLE = "<?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8') ?>";
+
 document.addEventListener('DOMContentLoaded', () => {
+  const roleDefaultViews = {
+    'admin': 'admin-view',
+    'system administrator': 'admin-view',
+    'manager': 'admin-view',
+    'branch manager': 'admin-view',
+    'reception': 'pos-view',
+    'receptionist / cashier': 'pos-view',
+    'cashier': 'pos-view',
+    'waiter': 'pos-view',
+    'head waiter': 'pos-view',
+    'kitchen': 'kds-view',
+    'chef': 'kds-view',
+    'head chef': 'kds-view'
+  };
+
+  const initialView = roleDefaultViews[window.CURRENT_USER_ROLE.toLowerCase()] || 'admin-view';
+  const targetNavLink = document.querySelector(`.sidebar-nav a[href="#${initialView}"]`);
+  switchRoleView(initialView, targetNavLink);
+
   loadWaiterMatrix();
   loadActiveOrders();
 });
