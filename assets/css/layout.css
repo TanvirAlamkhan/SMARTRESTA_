@@ -77,6 +77,9 @@
   font-weight: 500;
   font-size: 0.875rem;
   transition: all var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-item:hover {

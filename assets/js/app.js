@@ -14,9 +14,21 @@ const SMARTRESTA = {
     console.log('SMARTRESTA Platform Initialized (Traditional Web App Mode - Vanilla JS / PHP / MySQL)');
   },
 
+  updateThemeButton(theme) {
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) {
+      if (theme === 'dark') {
+        btn.innerHTML = `<span>☀️</span><span>Toggle Light Mode</span>`;
+      } else {
+        btn.innerHTML = `<span>🌙</span><span>Toggle Dark Mode</span>`;
+      }
+    }
+  },
+
   initTheme() {
     const savedTheme = localStorage.getItem('smartresta_theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
+    this.updateThemeButton(savedTheme);
   },
 
   toggleTheme() {
@@ -24,6 +36,7 @@ const SMARTRESTA = {
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('smartresta_theme', newTheme);
+    this.updateThemeButton(newTheme);
     if (window.SmartNotifications) {
       SmartNotifications.show(`Switched to ${newTheme.toUpperCase()} mode`, 'info');
     }

@@ -8,12 +8,13 @@ require_once __DIR__ . '/../config/env.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/CSRF.php';
 
+require_once __DIR__ . '/../core/Router.php';
+
 CSRF::init();
 $csrfToken = CSRF::getToken();
 
 if (Auth::check()) {
-    header("Location: ../index.php");
-    exit;
+    Router::redirectToPortal('../');
 }
 ?>
 <!DOCTYPE html>

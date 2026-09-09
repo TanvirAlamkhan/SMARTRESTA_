@@ -15,8 +15,15 @@ Auth::requireAuth();
 CSRF::init();
 $csrfToken = CSRF::getToken();
 $currentUser = Auth::user();
-$userRole = strtolower(trim(Auth::role() ?? 'admin'));
-$isPhpSubdir = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/php/') !== false);
+$scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
+$isPhpSubdir = (
+    strpos($scriptPath, '/php/') !== false ||
+    strpos($scriptPath, '/admin/') !== false ||
+    strpos($scriptPath, '/manager/') !== false ||
+    strpos($scriptPath, '/reception/') !== false ||
+    strpos($scriptPath, '/waiter/') !== false ||
+    strpos($scriptPath, '/kitchen/') !== false
+);
 $assetPrefix = $isPhpSubdir ? '../' : './';
 ?>
 <!DOCTYPE html>
@@ -100,6 +107,10 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
       <a href="#admin" class="nav-item active" onclick="switchRoleView('admin', this, event)">
         <span class="nav-icon">📊</span>
         <span>Manager Dashboard</span>
+      </a>
+      <a href="#reception" class="nav-item" onclick="switchRoleView('reception', this, event)">
+        <span class="nav-icon">🛎️</span>
+        <span>Reception Front Desk</span>
       </a>
       <a href="#tables" class="nav-item" onclick="switchRoleView('tables', this, event)">
         <span class="nav-icon">🪑</span>
@@ -200,6 +211,7 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
     <div class="page-container">
 
       <?php
+      require_once __DIR__ . '/views/reception.php';
       require_once __DIR__ . '/views/admin.php';
       require_once __DIR__ . '/views/tables.php';
       require_once __DIR__ . '/views/menu.php';
@@ -1536,6 +1548,7 @@ function switchRoleView(viewId, navEl, event) {
 
   const titles = {
     'admin': 'Manager Dashboard',
+    'reception': 'Reception & Cashier Front Desk',
     'tables': 'Restaurant Floor Map & Tables',
     'menu': 'Restaurant Menu, Categories & Product Catalog',
     'pos': 'POS & Waiter Ordering',
@@ -1554,7 +1567,9 @@ function switchRoleView(viewId, navEl, event) {
   const titleEl = document.getElementById('view-title');
   if (titleEl) titleEl.textContent = titles[cleanId] || titles[viewId] || 'SMARTRESTA';
 
-  if (cleanId === 'tables') {
+  if (cleanId === 'reception') {
+    if (typeof SmartReception !== 'undefined' && typeof SmartReception.refreshAll === 'function') SmartReception.refreshAll();
+  } else if (cleanId === 'tables') {
     if (typeof loadFloorTables === 'function') loadFloorTables();
   } else if (cleanId === 'pos') {
     if (typeof loadPOSProducts === 'function') loadPOSProducts();
@@ -2252,9 +2267,10 @@ async function submitCreateStation() {
 }
 
 window.CURRENT_USER_ROLE = "<?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8') ?>";
+window.INITIAL_ACTIVE_SECTION = "<?= htmlspecialchars($initialSection ?? '', ENT_QUOTES, 'UTF-8') ?>";
 
 document.addEventListener('DOMContentLoaded', () => {
-  const ALL_VIEWS = ['admin', 'tables', 'menu', 'pos', 'kds', 'routing', 'payments', 'commission-rules', 'commissions-review', 'payouts', 'users', 'inventory', 'reports', 'finance', 'crm'];
+  const ALL_VIEWS = ['admin', 'reception', 'tables', 'menu', 'pos', 'kds', 'routing', 'payments', 'commission-rules', 'commissions-review', 'payouts', 'users', 'inventory', 'reports', 'finance', 'crm'];
 
   function resolveRoleAccess(roleStr) {
     const r = (roleStr || '').toLowerCase().trim();
@@ -2266,7 +2282,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return { views: ['kds', 'routing', 'inventory'], isFullAccess: false };
     }
     if (r.includes('reception') || r.includes('cashier') || r.includes('front')) {
-      return { views: ['tables', 'pos', 'kds', 'payments', 'crm'], isFullAccess: false };
+      return { views: ['reception', 'tables', 'pos', 'kds', 'payments', 'reports', 'finance', 'crm', 'admin'], isFullAccess: false };
     }
     if (r.includes('waiter') || r.includes('server') || r.includes('steward')) {
       return { views: ['pos', 'tables', 'menu', 'payments', 'payouts'], isFullAccess: false };
@@ -2523,6 +2539,7 @@ async function deleteProductAction(id, name) {
 <script src="<?= $assetPrefix ?>assets/js/reports.js"></script>
 <script src="<?= $assetPrefix ?>assets/js/finance.js"></script>
 <script src="<?= $assetPrefix ?>assets/js/crm.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/reception.js"></script>
 
 </body>
 </html>

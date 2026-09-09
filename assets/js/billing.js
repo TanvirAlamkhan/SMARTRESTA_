@@ -280,6 +280,14 @@ const SmartBilling = {
   },
 
   async submitPayment(orderId) {
+    const submitBtn = document.querySelector('#billing-modal-footer .btn-primary');
+    if (submitBtn) {
+      if (submitBtn.disabled) return; // Prevent double submission
+      submitBtn.disabled = true;
+      submitBtn.dataset.originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '⏳ Processing Settlement...';
+    }
+
     const rows = document.querySelectorAll('.split-pay-row');
     const splitPayments = [];
     let totalAmt = 0;
@@ -301,6 +309,10 @@ const SmartBilling = {
 
     if (splitPayments.length === 0) {
       SmartNotifications.show('Please enter a valid payment amount.', 'danger');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = submitBtn.dataset.originalText || 'Complete Settlement';
+      }
       return;
     }
 
@@ -317,6 +329,7 @@ const SmartBilling = {
         SmartNotifications.show('Payment processed & settled successfully', 'success');
         SmartModal.close('order-billing-modal');
         if (typeof loadActiveOrders === 'function') loadActiveOrders();
+        this.loadPaymentHistory();
         
         // Open Receipt Modal for processed payment
         if (res.data.payments && res.data.payments.length > 0) {
@@ -325,6 +338,11 @@ const SmartBilling = {
       }
     } catch (err) {
       SmartNotifications.show(err.message || 'Payment processing failed', 'danger');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = submitBtn.dataset.originalText || 'Complete Settlement';
+      }
     }
   },
 
@@ -466,11 +484,75 @@ const SmartBilling = {
       if (res.success && res.data) {
         this.allPayments = res.data;
         this.renderPaymentsTable(this.allPayments);
+        this.updateReceptionKPIs(this.allPayments);
       } else {
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--text-muted);">No payment records recorded in database.</td></tr>`;
       }
     } catch (err) {
       tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--danger);">Failed to load payment history.</td></tr>`;
+    }
+  },
+
+  async updateReceptionKPIs(payments) {
+    let todayNet = 0;
+    let cashTotal = 0;
+    let digitalTotal = 0;
+    let refundsTotal = 0;
+    let refundsCount = 0;
+
+    (payments || []).forEach(p => {
+      const amt = parseFloat(p.amount || 0);
+      const st = (p.status || '').toUpperCase();
+      const method = (p.payment_method_name || '').toLowerCase();
+
+      if (st === 'COMPLETED') {
+        todayNet += amt;
+        if (method.includes('cash')) {
+          cashTotal += amt;
+        } else if (method.includes('bkash') || method.includes('nagad') || method.includes('card') || method.includes('pos')) {
+          digitalTotal += amt;
+        }
+      } else if (st.includes('REFUND')) {
+        refundsTotal += amt;
+        refundsCount += 1;
+      }
+    });
+
+    const netEl = document.getElementById('kpi-rec-today-net');
+    if (netEl) netEl.textContent = `৳${todayNet.toFixed(2)}`;
+
+    const cashEl = document.getElementById('kpi-rec-cash-total');
+    if (cashEl) cashEl.textContent = `৳${cashTotal.toFixed(2)}`;
+
+    const digitalEl = document.getElementById('kpi-rec-digital-total');
+    if (digitalEl) digitalEl.textContent = `৳${digitalTotal.toFixed(2)}`;
+
+    const refundsEl = document.getElementById('kpi-rec-refunds-total');
+    if (refundsEl) refundsEl.textContent = `৳${refundsTotal.toFixed(2)}`;
+
+    const refundsCntEl = document.getElementById('kpi-rec-refunds-count');
+    if (refundsCntEl) refundsCntEl.textContent = `${refundsCount} Reversals`;
+
+    // Fetch Unpaid Active Orders for Open Bills KPI
+    try {
+      const ordRes = await SmartAPI.get('api/v1/orders/index.php');
+      if (ordRes.success && ordRes.data) {
+        const unpaid = ordRes.data.filter(o => o.payment_status !== 'PAID' && o.order_status !== 'CANCELLED');
+        let outstandingSum = 0;
+        unpaid.forEach(o => {
+          const grandTotal = parseFloat(o.grand_total || 0);
+          const paid = parseFloat(o.total_paid || 0);
+          outstandingSum += Math.max(0, grandTotal - paid);
+        });
+
+        const openCntEl = document.getElementById('kpi-rec-open-count');
+        if (openCntEl) openCntEl.textContent = unpaid.length;
+
+        const openBalEl = document.getElementById('kpi-rec-open-balance');
+        if (openBalEl) openBalEl.textContent = `৳${outstandingSum.toFixed(2)} Outstanding`;
+      }
+    } catch (e) {
+      console.warn('Failed to load unpaid orders summary for Reception KPIs:', e);
     }
   },
 

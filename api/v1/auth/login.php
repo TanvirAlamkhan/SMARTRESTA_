@@ -58,7 +58,9 @@ if (!$user) {
 // Clear Rate Limiter on Success
 RateLimiter::clear($email);
 
-$redirectTarget = '../index.php';
+require_once __DIR__ . '/../../../core/Router.php';
+
+$redirectTarget = '../' . Router::getPortalPath($user['role_name'] ?: $user['role']);
 
 Response::json(true, 200, "Authentication successful", [
     'user' => [
