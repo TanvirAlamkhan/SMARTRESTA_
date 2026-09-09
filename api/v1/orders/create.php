@@ -4,13 +4,13 @@
  * POST /api/v1/orders/create.php
  */
 
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../helpers/response.php';
+require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../core/Response.php';
 
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (!$input || empty($input['items'])) {
-    sendJsonResponse(false, 400, "Invalid payload. Items array is required.");
+    Response::json(false, 400, "Invalid payload. Items array is required.");
 }
 
 $db = Database::getConnection();

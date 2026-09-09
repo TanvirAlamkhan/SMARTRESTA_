@@ -6,11 +6,11 @@
  * 100% Server-Authoritative Database-Backed Aggregations.
  */
 
-require_once __DIR__ . '/../../config/env.php';
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../core/Auth.php';
-require_once __DIR__ . '/../../core/WaiterEngine.php';
-require_once __DIR__ . '/../../helpers/response.php';
+require_once __DIR__ . '/../../../config/env.php';
+require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../core/Auth.php';
+require_once __DIR__ . '/../../../core/WaiterEngine.php';
+require_once __DIR__ . '/../../../core/Response.php';
 
 Auth::requireAuth();
 
@@ -21,8 +21,8 @@ try {
     $endDate = !empty($_GET['end_date']) ? trim($_GET['end_date']) : null;
 
     $matrix = WaiterEngine::getPerformanceMatrix($branchId, $startDate, $endDate);
-    sendJsonResponse(true, 200, "Waiter performance matrix retrieved", $matrix);
+    Response::json(true, 200, "Waiter performance matrix retrieved", $matrix);
 
 } catch (Exception $e) {
-    sendJsonResponse(false, 500, "Failed to retrieve waiter matrix: " . $e->getMessage());
+    Response::json(false, 500, "Failed to retrieve waiter matrix: " . $e->getMessage());
 }

@@ -5,11 +5,11 @@
  * POST /api/v1/waiters/index.php
  */
 
-require_once __DIR__ . '/../../config/env.php';
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../core/Auth.php';
-require_once __DIR__ . '/../../core/WaiterEngine.php';
-require_once __DIR__ . '/../../helpers/response.php';
+require_once __DIR__ . '/../../../config/env.php';
+require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../core/Auth.php';
+require_once __DIR__ . '/../../../core/WaiterEngine.php';
+require_once __DIR__ . '/../../../core/Response.php';
 
 Auth::requireAuth();
 
@@ -22,7 +22,7 @@ try {
         $status = !empty($_GET['status']) ? trim($_GET['status']) : null;
 
         $waiters = WaiterEngine::getWaitersList($branchId, $status);
-        sendJsonResponse(true, 200, "Waiters list retrieved successfully", $waiters);
+        Response::json(true, 200, "Waiters list retrieved successfully", $waiters);
 
     } else if ($method === 'POST') {
         Auth::requirePermission('waiters.manage');
@@ -32,16 +32,15 @@ try {
         $branchId = (int)($data['branch_id'] ?? 1);
 
         if (!$userId) {
-            sendJsonResponse(false, 400, "User ID is required.");
-            exit;
+            Response::json(false, 400, "User ID is required.");
         }
 
         $profile = WaiterEngine::getOrCreateProfile($userId, $branchId);
-        sendJsonResponse(true, 200, "Waiter profile configured successfully", $profile);
+        Response::json(true, 200, "Waiter profile configured successfully", $profile);
 
     } else {
-        sendJsonResponse(false, 405, "Method not allowed.");
+        Response::json(false, 405, "Method not allowed.");
     }
 } catch (Exception $e) {
-    sendJsonResponse(false, 400, $e->getMessage());
+    Response::json(false, 400, $e->getMessage());
 }

@@ -4,27 +4,26 @@
  * POST /api/v1/waiters/assign.php
  */
 
-require_once __DIR__ . '/../../config/env.php';
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../core/Auth.php';
-require_once __DIR__ . '/../../core/WaiterEngine.php';
-require_once __DIR__ . '/../../helpers/response.php';
+require_once __DIR__ . '/../../../config/env.php';
+require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../core/Auth.php';
+require_once __DIR__ . '/../../../core/WaiterEngine.php';
+require_once __DIR__ . '/../../../core/Response.php';
 
 Auth::requireAuth();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    sendJsonResponse(false, 405, "Method not allowed.");
-    exit;
+    Response::json(false, 405, "Method not allowed.");
 }
 
 try {
     Auth::requirePermission('waiters.assign');
     $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-    $user = Auth::getCurrentUser();
+    $userId = Auth::userId();
 
-    $res = WaiterEngine::assignWaiter($data, (int)$user['id']);
-    sendJsonResponse(true, 200, "Waiter assigned successfully", $res);
+    $res = WaiterEngine::assignWaiter($data, (int)$userId);
+    Response::json(true, 200, "Waiter assigned successfully", $res);
 
 } catch (Exception $e) {
-    sendJsonResponse(false, 400, $e->getMessage());
+    Response::json(false, 400, $e->getMessage());
 }
