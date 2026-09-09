@@ -11,5 +11,5 @@ require_once __DIR__ . '/../core/Router.php';
 
 Router::authorizePortal('waiter');
 
-$initialSection = 'pos';
+$initialSection = 'waiter';
 require_once __DIR__ . '/../index.php';

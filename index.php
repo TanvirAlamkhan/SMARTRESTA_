@@ -112,6 +112,10 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
         <span class="nav-icon">🛎️</span>
         <span>Reception Front Desk</span>
       </a>
+      <a href="#waiter" class="nav-item" onclick="switchRoleView('waiter', this, event)">
+        <span class="nav-icon">🍷</span>
+        <span>Waiter Workspace</span>
+      </a>
       <a href="#tables" class="nav-item" onclick="switchRoleView('tables', this, event)">
         <span class="nav-icon">🪑</span>
         <span>Floors & Dining Tables</span>
@@ -211,6 +215,7 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
     <div class="page-container">
 
       <?php
+      require_once __DIR__ . '/views/waiter.php';
       require_once __DIR__ . '/views/reception.php';
       require_once __DIR__ . '/views/admin.php';
       require_once __DIR__ . '/views/tables.php';
@@ -1548,6 +1553,7 @@ function switchRoleView(viewId, navEl, event) {
 
   const titles = {
     'admin': 'Manager Dashboard',
+    'waiter': 'Waiter Station & Table Operations',
     'reception': 'Reception & Cashier Front Desk',
     'tables': 'Restaurant Floor Map & Tables',
     'menu': 'Restaurant Menu, Categories & Product Catalog',
@@ -1567,7 +1573,9 @@ function switchRoleView(viewId, navEl, event) {
   const titleEl = document.getElementById('view-title');
   if (titleEl) titleEl.textContent = titles[cleanId] || titles[viewId] || 'SMARTRESTA';
 
-  if (cleanId === 'reception') {
+  if (cleanId === 'waiter') {
+    if (typeof SmartWaiter !== 'undefined' && typeof SmartWaiter.refreshAll === 'function') SmartWaiter.refreshAll();
+  } else if (cleanId === 'reception') {
     if (typeof SmartReception !== 'undefined' && typeof SmartReception.refreshAll === 'function') SmartReception.refreshAll();
   } else if (cleanId === 'tables') {
     if (typeof loadFloorTables === 'function') loadFloorTables();
@@ -2270,7 +2278,7 @@ window.CURRENT_USER_ROLE = "<?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8')
 window.INITIAL_ACTIVE_SECTION = "<?= htmlspecialchars($initialSection ?? '', ENT_QUOTES, 'UTF-8') ?>";
 
 document.addEventListener('DOMContentLoaded', () => {
-  const ALL_VIEWS = ['admin', 'reception', 'tables', 'menu', 'pos', 'kds', 'routing', 'payments', 'commission-rules', 'commissions-review', 'payouts', 'users', 'inventory', 'reports', 'finance', 'crm'];
+  const ALL_VIEWS = ['admin', 'waiter', 'reception', 'tables', 'menu', 'pos', 'kds', 'routing', 'payments', 'commission-rules', 'commissions-review', 'payouts', 'users', 'inventory', 'reports', 'finance', 'crm'];
 
   function resolveRoleAccess(roleStr) {
     const r = (roleStr || '').toLowerCase().trim();
@@ -2285,7 +2293,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return { views: ['reception', 'tables', 'pos', 'kds', 'payments', 'reports', 'finance', 'crm', 'admin'], isFullAccess: false };
     }
     if (r.includes('waiter') || r.includes('server') || r.includes('steward')) {
-      return { views: ['pos', 'tables', 'menu', 'payments', 'payouts'], isFullAccess: false };
+      return { views: ['waiter', 'pos', 'tables', 'menu', 'kds', 'payments', 'payouts', 'crm', 'admin'], isFullAccess: false };
     }
     return { views: ['pos', 'tables'], isFullAccess: false };
   }
@@ -2540,6 +2548,7 @@ async function deleteProductAction(id, name) {
 <script src="<?= $assetPrefix ?>assets/js/finance.js"></script>
 <script src="<?= $assetPrefix ?>assets/js/crm.js"></script>
 <script src="<?= $assetPrefix ?>assets/js/reception.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/waiter.js"></script>
 
 </body>
 </html>
