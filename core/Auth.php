@@ -47,13 +47,18 @@ class Auth {
     public static function login($email, $password) {
         self::initSession();
 
-        $user = DB::fetch("
-            SELECT u.id, u.name, u.email, u.password_hash, u.role, u.status, u.role_id,
-                   r.name as role_name
-            FROM users u
-            LEFT JOIN roles r ON u.role_id = r.id
-            WHERE u.email = ? AND u.deleted_at IS NULL
-        ", [trim($email)]);
+        try {
+            $user = DB::fetch("
+                SELECT u.id, u.name, u.email, u.password_hash, u.role, u.status, u.role_id,
+                       r.name as role_name
+                FROM users u
+                LEFT JOIN roles r ON u.role_id = r.id
+                WHERE u.email = ? AND u.deleted_at IS NULL
+            ", [trim($email)]);
+        } catch (Exception $e) {
+            error_log("Auth Login DB Exception: " . $e->getMessage());
+            return false;
+        }
 
         if (!$user) {
             return false;

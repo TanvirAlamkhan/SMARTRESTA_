@@ -1,7 +1,7 @@
 <?php
 /**
  * SMARTRESTA Production Database Connection Manager
- * Railway-Ready PDO Singleton with Transaction & Exception Management
+ * Railway-Ready PDO Singleton with Multi-URL & Variable Auto-Detection
  */
 
 require_once __DIR__ . '/env.php';
@@ -11,11 +11,30 @@ class Database {
 
     public static function getConnection() {
         if (self::$conn === null) {
-            $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: 'localhost';
-            $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
-            $dbname = getenv('DB_DATABASE') ?: getenv('MYSQLDATABASE') ?: 'smartresta_db';
-            $user = getenv('DB_USERNAME') ?: getenv('MYSQLUSER') ?: 'root';
-            $pass = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : '');
+            $host = 'localhost';
+            $port = '3306';
+            $dbname = 'smartresta_db';
+            $user = 'root';
+            $pass = '';
+
+            // Check if Railway provides a connection URL (MYSQLURL / MYSQL_URL / DATABASE_URL)
+            $dbUrl = getenv('MYSQLURL') ?: getenv('MYSQL_URL') ?: getenv('DATABASE_URL');
+            if (!empty($dbUrl)) {
+                $parsed = parse_url($dbUrl);
+                if ($parsed && isset($parsed['host'])) {
+                    $host = $parsed['host'];
+                    $port = $parsed['port'] ?? '3306';
+                    $user = $parsed['user'] ?? 'root';
+                    $pass = $parsed['pass'] ?? '';
+                    $dbname = ltrim($parsed['path'] ?? 'smartresta_db', '/');
+                }
+            } else {
+                $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
+                $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: '3306';
+                $dbname = getenv('DB_DATABASE') ?: getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'smartresta_db';
+                $user = getenv('DB_USERNAME') ?: getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: 'root';
+                $pass = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : (getenv('MYSQL_PASSWORD') !== false ? getenv('MYSQL_PASSWORD') : ''));
+            }
 
             try {
                 self::$conn = new PDO(
