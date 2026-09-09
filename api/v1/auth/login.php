@@ -58,14 +58,7 @@ if (!$user) {
 // Clear Rate Limiter on Success
 RateLimiter::clear($email);
 
-$roleName = strtolower(trim($user['role_name'] ?: $user['role']));
-$redirectTarget = '../php/admin.php';
-
-if (strpos($roleName, 'waiter') !== false || strpos($roleName, 'reception') !== false || strpos($roleName, 'cashier') !== false) {
-    $redirectTarget = '../php/pos.php';
-} elseif (strpos($roleName, 'kitchen') !== false || strpos($roleName, 'chef') !== false || strpos($roleName, 'cook') !== false) {
-    $redirectTarget = '../php/kds.php';
-}
+$redirectTarget = '../index.php';
 
 Response::json(true, 200, "Authentication successful", [
     'user' => [
