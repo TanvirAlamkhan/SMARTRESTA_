@@ -1,0 +1,41 @@
+-- SMARTRESTA Migration 002: Restaurant Branches, Floors, Stations, and Tables
+USE `smartresta_db`;
+
+CREATE TABLE IF NOT EXISTS `branches` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `code` VARCHAR(30) NOT NULL UNIQUE,
+  `address` TEXT NULL,
+  `phone` VARCHAR(30) NULL,
+  `status` ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `floors` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `branch_id` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(80) NOT NULL,
+  `sort_order` INT DEFAULT 0,
+  FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `stations` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `branch_id` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(50) NOT NULL,
+  `badge_code` VARCHAR(20) NOT NULL UNIQUE,
+  `status` ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE',
+  FOREIGN KEY (`branch_id`) REFERENCES `branches`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `restaurant_tables` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `floor_id` INT UNSIGNED NOT NULL,
+  `table_number` VARCHAR(30) NOT NULL,
+  `capacity` INT NOT NULL DEFAULT 4,
+  `status` ENUM('AVAILABLE', 'OCCUPIED', 'RESERVED', 'WAITING_PAYMENT', 'CLEANING', 'OUT_OF_SERVICE') DEFAULT 'AVAILABLE',
+  `is_active` TINYINT(1) DEFAULT 1,
+  `deleted_at` TIMESTAMP NULL,
+  UNIQUE KEY `idx_floor_table` (`floor_id`, `table_number`),
+  FOREIGN KEY (`floor_id`) REFERENCES `floors`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

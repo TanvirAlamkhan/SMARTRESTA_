@@ -1,0 +1,170 @@
+/* SMARTRESTA Kitchen Display System (KDS) Kanban Layout */
+
+.kds-kanban {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+  height: calc(100vh - var(--topbar-height) - 48px);
+}
+
+.kds-column {
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kds-column-header {
+  padding: var(--space-4);
+  background-color: var(--surface);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kds-column-header.new { border-bottom-color: var(--warning); }
+.kds-column-header.preparing { border-bottom-color: var(--info); }
+.kds-column-header.ready { border-bottom-color: var(--success); }
+.kds-column-header.served { border-bottom-color: var(--text-muted); }
+
+.kds-tickets-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* KDS Ticket Card */
+.kds-ticket {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform var(--transition-fast);
+}
+
+.kds-ticket:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.kds-ticket-header {
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-hover);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kds-ticket-id {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.kds-ticket-timer {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background-color: var(--warning-light);
+  color: var(--warning);
+}
+
+.kds-ticket-body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.kds-ticket-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.kds-item-qty {
+  background-color: var(--accent-subtle);
+  color: var(--accent-dark);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  margin-right: 6px;
+}
+
+.kds-ticket-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border);
+  background-color: var(--surface-hover);
+}
+
+/* Enhanced KDS Ticket Card Styles */
+.kds-ticket-card {
+  background-color: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.kds-ticket-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.kds-ticket-card.urgent-flash {
+  border-color: var(--danger);
+  animation: urgentPulse 1.5s infinite;
+}
+
+@keyframes urgentPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.elapsed-time-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono, monospace);
+}
+
+.waiting-ticker {
+  background-color: var(--warning-light, #fef3c7);
+  color: var(--warning-dark, #b45309);
+}
+
+.preparing-ticker {
+  background-color: var(--info-light, #e0f2fe);
+  color: var(--info-dark, #0369a1);
+}
+
+@media (max-width: 1024px) {
+  .kds-kanban {
+    grid-template-columns: repeat(2, 1fr);
+    height: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .kds-kanban {
+    grid-template-columns: 1fr;
+  }
+}
+

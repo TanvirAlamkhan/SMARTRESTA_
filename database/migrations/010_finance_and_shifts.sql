@@ -1,0 +1,28 @@
+-- SMARTRESTA Migration 010: Expense Categories, Expenses, and Cashier Shifts
+USE `smartresta_db`;
+
+CREATE TABLE IF NOT EXISTS `expense_categories` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(80) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `expenses` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `category_id` INT UNSIGNED NOT NULL,
+  `amount` DECIMAL(12,2) NOT NULL,
+  `title` VARCHAR(150) NOT NULL,
+  `recorded_by_user_id` INT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`category_id`) REFERENCES `expense_categories`(`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `shifts` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL,
+  `opened_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `closed_at` TIMESTAMP NULL,
+  `opening_balance` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `closing_balance` DECIMAL(12,2) NULL,
+  `status` ENUM('OPEN', 'CLOSED') DEFAULT 'OPEN',
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

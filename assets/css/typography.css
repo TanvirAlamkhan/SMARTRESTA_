@@ -1,0 +1,69 @@
+/* SMARTRESTA Typography System */
+
+h1, .h1 {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+h2, .h2 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+h3, .h3 {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+h4, .h4 {
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.text-body {
+  font-size: 0.875rem; /* 14px */
+  color: var(--text-secondary);
+}
+
+.text-sm {
+  font-size: 0.75rem; /* 12px */
+  color: var(--text-muted);
+}
+
+.text-uppercase-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.price-tag {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.price-tag::before {
+  content: "৳";
+  margin-right: 2px;
+}
+
+.kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}

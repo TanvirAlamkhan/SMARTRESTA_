@@ -1,0 +1,23 @@
+-- SMARTRESTA Migration 005: Order Routes and Kitchen Tickets
+USE `smartresta_db`;
+
+CREATE TABLE IF NOT EXISTS `order_routes` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `order_id` INT UNSIGNED NOT NULL,
+  `station_id` INT UNSIGNED NOT NULL,
+  `routing_mode` ENUM('AUTOMATIC', 'MANUAL', 'HYBRID') DEFAULT 'AUTOMATIC',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`station_id`) REFERENCES `stations`(`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `order_tickets` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `order_id` INT UNSIGNED NOT NULL,
+  `station_id` INT UNSIGNED NOT NULL,
+  `ticket_number` VARCHAR(30) NOT NULL,
+  `status` ENUM('NEW', 'PREPARING', 'READY', 'SERVED') DEFAULT 'NEW',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`station_id`) REFERENCES `stations`(`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

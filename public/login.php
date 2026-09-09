@@ -1,0 +1,186 @@
+<?php
+/**
+ * SMARTRESTA Production Login Interface
+ * Technology: HTML5, CSS3, Vanilla ES6+ JS, PHP 8.x
+ */
+
+require_once __DIR__ . '/../config/env.php';
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/../core/CSRF.php';
+
+CSRF::init();
+$csrfToken = CSRF::getToken();
+
+if (Auth::check()) {
+    header("Location: ../index.php");
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+  <title>Login — SMARTRESTA Restaurant OS</title>
+
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Modular CSS Architecture -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/reset.css">
+  <link rel="stylesheet" href="../assets/css/typography.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/forms.css">
+  <link rel="stylesheet" href="../assets/css/dark-mode.css">
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(circle at top right, var(--bg-secondary), var(--bg-primary));
+      padding: var(--space-4);
+    }
+    .login-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 420px;
+      padding: var(--space-8) var(--space-6);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+    .login-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      text-align: center;
+    }
+    .login-brand .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .login-brand .logo-badge {
+      background: var(--accent);
+      color: #FFF;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+    }
+    .password-wrapper {
+      position: relative;
+    }
+    .toggle-pass {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .alert-error {
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--danger-light);
+      color: var(--danger);
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="login-brand">
+    <div class="logo">
+      <span>SMARTRESTA</span>
+      <span class="logo-badge">OS</span>
+    </div>
+    <p class="text-sm">Restaurant Operations & Performance Management System</p>
+  </div>
+
+  <div id="login-alert" class="alert-error"></div>
+
+  <form id="login-form" onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label class="form-label">Email / Identifier</label>
+      <input type="email" id="email" class="form-control" placeholder="admin@smartresta.com" required autofocus>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="password-wrapper">
+        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+        <span class="toggle-pass" onclick="togglePasswordVisibility()">Show</span>
+      </div>
+    </div>
+
+    <button type="submit" id="submit-btn" class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--space-3);">
+      Sign In to Platform
+    </button>
+  </form>
+</div>
+
+<script src="../assets/js/ajax.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script>
+function togglePasswordVisibility() {
+  const input = document.getElementById('password');
+  const toggle = document.querySelector('.toggle-pass');
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggle.textContent = 'Hide';
+  } else {
+    input.type = 'password';
+    toggle.textContent = 'Show';
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const alertEl = document.getElementById('login-alert');
+  const btn = document.getElementById('submit-btn');
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  alertEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Authenticating...';
+
+  try {
+    const res = await SmartAPI.post('../api/v1/auth/login.php', { email, password });
+    if (res.success) {
+      if (window.SmartNotifications) {
+        SmartNotifications.show(`Welcome back, ${res.data.user.name}!`, 'success');
+      }
+      setTimeout(() => {
+        window.location.href = '../index.php';
+      }, 500);
+    }
+  } catch (err) {
+    alertEl.textContent = err.message || 'Invalid login credentials.';
+    alertEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In to Platform';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+-- SMARTRESTA Migration 011: Coupons, Promotions, and Usage Logs
+USE `smartresta_db`;
+
+CREATE TABLE IF NOT EXISTS `coupons` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `code` VARCHAR(30) NOT NULL UNIQUE,
+  `discount_type` ENUM('PERCENTAGE', 'FIXED') DEFAULT 'PERCENTAGE',
+  `discount_amount` DECIMAL(12,2) NOT NULL,
+  `valid_from` DATETIME NOT NULL,
+  `valid_until` DATETIME NOT NULL,
+  `is_active` TINYINT(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `coupon_usage` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `coupon_id` INT UNSIGNED NOT NULL,
+  `order_id` INT UNSIGNED NOT NULL,
+  `customer_id` INT UNSIGNED NULL,
+  `used_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`coupon_id`) REFERENCES `coupons`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

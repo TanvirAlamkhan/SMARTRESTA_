@@ -1,0 +1,23 @@
+# SMARTRESTA Git Ignore Rules
+
+# Environment Secrets
+.env
+.env.*
+!.env.example
+
+# OS & Machine Specific Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs, Backups & Temporary Storage
+storage/logs/*
+!storage/logs/.gitignore
+storage/backups/*
+!storage/backups/.gitignore
+storage/tmp/*
+
+# IDE & Editor Settings
+.idea/
+.vscode/
+*.swp

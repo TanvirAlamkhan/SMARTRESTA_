@@ -1,0 +1,25 @@
+/* SMARTRESTA Dark Mode Specific Enhancements */
+
+[data-theme="dark"] .kds-column {
+  background-color: var(--surface-secondary);
+}
+
+[data-theme="dark"] .data-table th {
+  background-color: var(--surface-secondary);
+}
+
+[data-theme="dark"] .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="dark"] .form-control {
+  background-color: var(--surface-hover);
+}
+
+[data-theme="dark"] .kpi-trend.positive {
+  background-color: rgba(16, 185, 129, 0.15);
+}
+
+[data-theme="dark"] .kpi-trend.negative {
+  background-color: rgba(239, 68, 68, 0.15);
+}

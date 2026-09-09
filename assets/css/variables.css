@@ -1,0 +1,97 @@
+/* SMARTRESTA Design System - CSS Variables & Design Tokens */
+
+:root {
+  /* Color Palette - Light Mode */
+  --bg-primary: #F8F9FA;
+  --bg-secondary: #F1F3F5;
+  --surface: #FFFFFF;
+  --surface-hover: #F4F5F7;
+  --surface-active: #E9ECEF;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  /* Typography Colors */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverse: #FFFFFF;
+
+  /* Accent Color - Warm Amber / Brass */
+  --accent: #C58B4E;
+  --accent-hover: #B0783D;
+  --accent-dark: #8C5B28;
+  --accent-light: #FDF8F3;
+  --accent-subtle: rgba(197, 139, 78, 0.12);
+
+  /* Status Colors */
+  --success: #10B981;
+  --success-light: #ECFDF5;
+  --warning: #F59E0B;
+  --warning-light: #FFFBEB;
+  --danger: #EF4444;
+  --danger-light: #FEF2F2;
+  --info: #3B82F6;
+  --info-light: #EFF6FF;
+  --neutral-status: #64748B;
+
+  /* Station Routing Colors */
+  --station-kitchen: #E11D48;
+  --station-bar: #8B5CF6;
+  --station-coffee: #7C2D12;
+  --station-grill: #D97706;
+  --station-dessert: #EC4899;
+  --station-packaging: #0EA5E9;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-drawer: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+
+  /* Dimensions */
+  --sidebar-width: 260px;
+  --topbar-height: 64px;
+  --bottom-nav-height: 64px;
+}
+
+/* Dark Mode Tokens */
+[data-theme="dark"] {
+  --bg-primary: #0F1115;
+  --bg-secondary: #16191E;
+  --surface: #1C2026;
+  --surface-hover: #252A32;
+  --surface-active: #2D333D;
+  --border: #2A2F38;
+  --border-strong: #3F4654;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  --accent: #D49A52;
+  --accent-hover: #E2AA63;
+  --accent-light: rgba(212, 154, 82, 0.15);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
