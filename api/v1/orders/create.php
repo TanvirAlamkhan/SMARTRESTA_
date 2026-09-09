@@ -1,64 +1,65 @@
 <?php
 /**
- * SMARTRESTA API Endpoint: Create Order with Multi-Station Routing
+ * SMARTRESTA API Endpoint: Create & Submit Order with Multi-Station Routing
  * POST /api/v1/orders/create.php
  */
 
 require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../core/Auth.php';
+require_once __DIR__ . '/../../../core/OrderEngine.php';
+require_once __DIR__ . '/../../../core/RoutingEngine.php';
 require_once __DIR__ . '/../../../core/Response.php';
 
-$input = json_decode(file_get_contents('php://input'), true);
+Auth::requireAuth();
+Auth::requirePermission('orders.create');
 
-if (!$input || empty($input['items'])) {
-    Response::json(false, 400, "Invalid payload. Items array is required.");
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    Response::json(false, 405, "Method Not Allowed");
 }
 
-$db = Database::getConnection();
+$input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+$userId = Auth::user()['id'] ?? 1;
 
-if ($db) {
-    try {
-        $db->beginTransaction();
+if (!$input) {
+    Response::json(false, 400, "Invalid JSON payload.");
+}
 
-        $orderNumber = 'ORD-' . date('Ymd') . '-' . rand(1000, 9999);
-        $stmt = $db->prepare("
-            INSERT INTO orders (order_number, waiter_id, subtotal_amount, tax_amount, total_amount, payment_method, order_status)
-            VALUES (?, 2, ?, ?, ?, ?, 'new')
-        ");
-        $stmt->execute([
-            $orderNumber,
-            $input['subtotal'] ?? 0,
-            $input['tax'] ?? 0,
-            $input['total'] ?? 0,
-            $input['paymentMethod'] ?? 'Cash'
-        ]);
-        $orderId = $db->lastInsertId();
+try {
+    // 1. Create Draft Order
+    $draftResult = OrderEngine::createDraftOrder($input, $userId);
+    $orderId = (int)$draftResult['order_id'];
 
-        // Calculate & Insert 5% Waiter Commission
-        $commissionAmount = ($input['total'] ?? 0) * 0.05;
-        $commStmt = $db->prepare("
-            INSERT INTO waiter_commissions (order_id, waiter_id, sale_amount, commission_rate, commission_amount, status)
-            VALUES (?, 2, ?, 5.00, ?, 'pending')
-        ");
-        $commStmt->execute([$orderId, $input['total'] ?? 0, $commissionAmount]);
+    // 2. Add Line Items if provided
+    $items = !empty($input['items']) && is_array($input['items']) ? $input['items'] : [];
+    foreach ($items as $item) {
+        $productId = (int)($item['product_id'] ?? $item['id'] ?? 0);
+        $variantId = !empty($item['variant_id']) ? (int)$item['variant_id'] : null;
+        $modifiers = !empty($item['modifier_ids']) && is_array($item['modifier_ids']) ? $item['modifier_ids'] : [];
+        $quantity = (int)($item['quantity'] ?? 1);
+        $notes = !empty($item['notes']) ? trim($item['notes']) : null;
 
-        $db->commit();
-
-        sendJsonResponse(true, 201, "Order #{$orderNumber} successfully created and routed", [
-            'orderId' => $orderId,
-            'orderNumber' => $orderNumber,
-            'totalAmount' => $input['total'] ?? 0,
-            'commissionOwed' => $commissionAmount
-        ]);
-    } catch (Exception $e) {
-        $db->rollBack();
-        sendJsonResponse(false, 500, "Order creation failed: " . $e->getMessage());
+        if ($productId > 0 && $quantity > 0) {
+            OrderEngine::addItemToOrder($orderId, $productId, $variantId, $modifiers, $quantity, $notes, $userId);
+        }
     }
-} else {
-    // Dynamic Fallback Mode
-    $newOrderNumber = 'ORD-' . rand(1000, 9999);
-    sendJsonResponse(true, 201, "Order {$newOrderNumber} created and routed (fallback mode)", [
-        'orderId' => rand(2000, 9999),
-        'orderNumber' => $newOrderNumber,
-        'totalAmount' => $input['total'] ?? 0
+
+    // 3. Submit Order & Route to Stations if autoSubmit requested or items present
+    $submitResult = null;
+    if (!empty($items) || !empty($input['submit'])) {
+        $submitResult = OrderEngine::submitOrder($orderId, $userId);
+    }
+
+    $routeSummary = RoutingEngine::getOrderRouteSummary($orderId);
+
+    Response::json(true, 201, "Order #{$draftResult['order_number']} successfully created and routed", [
+        'order_id' => $orderId,
+        'order_number' => $draftResult['order_number'],
+        'status' => $submitResult['status'] ?? 'DRAFT',
+        'table_id' => $draftResult['table_id'],
+        'dining_session_id' => $draftResult['dining_session_id'],
+        'route_summary' => $routeSummary
     ]);
+
+} catch (Exception $e) {
+    Response::json(false, 422, "Order creation failed: " . $e->getMessage());
 }

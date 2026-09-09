@@ -7,6 +7,7 @@
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/AuditLogger.php';
 require_once __DIR__ . '/MenuEngine.php';
+require_once __DIR__ . '/RoutingEngine.php';
 
 class OrderEngine {
 
@@ -346,6 +347,14 @@ class OrderEngine {
             ]);
 
             $db->commit();
+
+            // Auto-trigger multi-station order routing & ticket dispatch
+            try {
+                RoutingEngine::routeOrder($orderId, $userId, 'AUTOMATIC');
+            } catch (Exception $re) {
+                error_log("Order Submission Station Routing Warning for Order #{$orderId}: " . $re->getMessage());
+            }
+
             return ['order_id' => $orderId, 'order_number' => $order['order_number'], 'status' => $newStatus];
 
         } catch (Exception $e) {
