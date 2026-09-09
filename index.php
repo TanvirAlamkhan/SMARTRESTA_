@@ -1518,7 +1518,7 @@ function switchRoleView(viewId, navEl) {
   if (navEl) {
     navEl.classList.add('active');
   } else {
-    const link = document.querySelector(`.sidebar-nav a[href="#${cleanId}"], .sidebar-nav a[href="${cleanId}.php"]`);
+    const link = document.querySelector(`.sidebar-nav a[href*="${cleanId}"]`);
     if (link) link.classList.add('active');
   }
 
@@ -1543,33 +1543,33 @@ function switchRoleView(viewId, navEl) {
   if (titleEl) titleEl.textContent = titles[cleanId] || titles[viewId] || 'SMARTRESTA';
 
   if (cleanId === 'tables') {
-    loadFloorTables();
+    if (typeof loadFloorTables === 'function') loadFloorTables();
   } else if (cleanId === 'pos') {
-    loadPOSProducts();
-    loadPOSTableSelector();
+    if (typeof loadPOSProducts === 'function') loadPOSProducts();
+    if (typeof loadPOSTableSelector === 'function') loadPOSTableSelector();
   } else if (cleanId === 'menu') {
-    loadCategoryOptions();
-    loadProductCatalog();
+    if (typeof loadCategoryOptions === 'function') loadCategoryOptions();
+    if (typeof loadProductCatalog === 'function') loadProductCatalog();
   } else if (cleanId === 'users') {
-    loadUsersList();
+    if (typeof loadUsersList === 'function') loadUsersList();
   } else if (cleanId === 'payments') {
-    SmartBilling.loadPaymentHistory();
+    if (typeof SmartBilling !== 'undefined' && typeof SmartBilling.loadPaymentHistory === 'function') SmartBilling.loadPaymentHistory();
   } else if (cleanId === 'commission-rules') {
-    SmartCommissions.loadCommissionRules();
+    if (typeof SmartCommissions !== 'undefined' && typeof SmartCommissions.loadCommissionRules === 'function') SmartCommissions.loadCommissionRules();
   } else if (cleanId === 'commissions-review') {
-    SmartCommissions.loadCommissionsReview();
+    if (typeof SmartCommissions !== 'undefined' && typeof SmartCommissions.loadCommissionsReview === 'function') SmartCommissions.loadCommissionsReview();
   } else if (cleanId === 'payouts') {
-    SmartCommissions.loadPayoutHistory();
+    if (typeof SmartCommissions !== 'undefined' && typeof SmartCommissions.loadPayoutHistory === 'function') SmartCommissions.loadPayoutHistory();
   } else if (cleanId === 'kds') {
-    SmartKDS.loadKDSGrid();
+    if (typeof SmartKDS !== 'undefined' && typeof SmartKDS.loadKDSGrid === 'function') SmartKDS.loadKDSGrid();
   } else if (cleanId === 'inventory') {
-    SmartInventory.init();
+    if (typeof SmartInventory !== 'undefined' && typeof SmartInventory.init === 'function') SmartInventory.init();
   } else if (cleanId === 'reports') {
-    SmartReports.loadCurrentTab();
+    if (typeof SmartReports !== 'undefined' && typeof SmartReports.loadCurrentTab === 'function') SmartReports.loadCurrentTab();
   } else if (cleanId === 'finance') {
-    SmartFinance.init();
+    if (typeof SmartFinance !== 'undefined' && typeof SmartFinance.init === 'function') SmartFinance.init();
   } else if (cleanId === 'crm') {
-    SmartCRM.init();
+    if (typeof SmartCRM !== 'undefined' && typeof SmartCRM.init === 'function') SmartCRM.init();
   }
 }
 
@@ -2266,18 +2266,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Navigate to initial view for this role or hash fragment if specified
-  let initialView = allowedList[0] || 'pos';
-  if (window.location.hash) {
-    const hashClean = window.location.hash.replace('#', '').replace(/-view$/, '');
-    if (allowedList.includes(hashClean) || isFullAccess) {
-      initialView = hashClean;
-    }
-  } else if (window.INITIAL_ACTIVE_SECTION) {
-    initialView = window.INITIAL_ACTIVE_SECTION;
+  // Detect active page module from URL path (e.g. /php/pos.php -> 'pos', /php/kds.php -> 'kds')
+  const pathMatch = window.location.pathname.match(/\/php\/([a-z0-9_-]+)\.php/i);
+  const pathSection = pathMatch ? pathMatch[1] : null;
+  const hashClean = window.location.hash ? window.location.hash.replace('#', '').replace(/-view$/, '') : null;
+
+  let initialView = pathSection || hashClean || window.INITIAL_ACTIVE_SECTION || allowedList[0] || 'pos';
+  if (!allowedList.includes(initialView) && !isFullAccess) {
+    initialView = allowedList[0] || 'pos';
   }
 
-  const targetNavLink = document.querySelector(`.sidebar-nav a[href="#${initialView}"], .sidebar-nav a[href="${initialView}.php"]`);
+  const targetNavLink = document.querySelector(`.sidebar-nav a[href*="${initialView}"]`);
   switchRoleView(initialView, targetNavLink);
 
   // Load operational data for all authenticated roles (Waiters, Staff, Managers, Admins)
@@ -2486,6 +2485,23 @@ async function deleteProductAction(id, name) {
   }
 }
 </script>
+
+<!-- Core Infrastructure JS -->
+<script src="assets/js/notifications.js"></script>
+<script src="assets/js/ajax.js"></script>
+<script src="assets/js/modal.js"></script>
+<script src="assets/js/app.js"></script>
+
+<!-- Module Operational JS Controllers -->
+<script src="assets/js/pos.js"></script>
+<script src="assets/js/kds.js"></script>
+<script src="assets/js/routing.js"></script>
+<script src="assets/js/billing.js"></script>
+<script src="assets/js/commissions.js"></script>
+<script src="assets/js/inventory.js"></script>
+<script src="assets/js/reports.js"></script>
+<script src="assets/js/finance.js"></script>
+<script src="assets/js/crm.js"></script>
 
 </body>
 </html>
