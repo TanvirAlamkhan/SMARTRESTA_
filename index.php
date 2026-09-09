@@ -3219,27 +3219,57 @@ async function submitCreateStation() {
 window.CURRENT_USER_ROLE = "<?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8') ?>";
 
 document.addEventListener('DOMContentLoaded', () => {
-  const roleDefaultViews = {
-    'admin': 'admin-view',
-    'system administrator': 'admin-view',
-    'manager': 'admin-view',
-    'branch manager': 'admin-view',
-    'reception': 'pos-view',
-    'receptionist / cashier': 'pos-view',
-    'cashier': 'pos-view',
-    'waiter': 'pos-view',
-    'head waiter': 'pos-view',
-    'kitchen': 'kds-view',
-    'chef': 'kds-view',
-    'head chef': 'kds-view'
+  const roleAllowedViews = {
+    'admin': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
+    'system administrator': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
+    'manager': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
+    'branch manager': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
+    'reception': ['tables-view', 'pos-view', 'kds-view', 'payments-view', 'crm-view'],
+    'receptionist': ['tables-view', 'pos-view', 'kds-view', 'payments-view', 'crm-view'],
+    'cashier': ['tables-view', 'pos-view', 'kds-view', 'payments-view', 'crm-view'],
+    'waiter': ['pos-view', 'tables-view', 'menu-view', 'payments-view', 'payouts-view'],
+    'head waiter': ['pos-view', 'tables-view', 'menu-view', 'payments-view', 'payouts-view'],
+    'kitchen': ['kds-view', 'routing-view', 'inventory-view'],
+    'chef': ['kds-view', 'routing-view', 'inventory-view'],
+    'head chef': ['kds-view', 'routing-view', 'inventory-view']
   };
 
-  const initialView = roleDefaultViews[window.CURRENT_USER_ROLE.toLowerCase()] || 'admin-view';
+  const userRoleKey = window.CURRENT_USER_ROLE.toLowerCase();
+  const allowedList = roleAllowedViews[userRoleKey] || roleAllowedViews['admin'];
+
+  // Filter sidebar navigation links according to role permissions
+  document.querySelectorAll('.sidebar-nav a.nav-item').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      const viewId = href.replace('#', '');
+      if (!allowedList.includes(viewId)) {
+        link.style.display = 'none';
+      } else {
+        link.style.display = 'flex';
+      }
+    }
+  });
+
+  const initialView = allowedList[0] || 'admin-view';
   const targetNavLink = document.querySelector(`.sidebar-nav a[href="#${initialView}"]`);
   switchRoleView(initialView, targetNavLink);
 
-  loadWaiterMatrix();
-  loadActiveOrders();
+  // Safe background loaders
+  try {
+    if (typeof loadActiveOrders === 'function') {
+      loadActiveOrders();
+    }
+  } catch (err) {
+    console.log('Active orders initial load skipped:', err);
+  }
+
+  try {
+    if (allowedList.includes('admin-view') && typeof loadWaiterMatrix === 'function') {
+      loadWaiterMatrix();
+    }
+  } catch (err) {
+    console.log('Waiter matrix initial load skipped:', err);
+  }
 });
 </script>
 

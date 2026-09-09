@@ -232,49 +232,33 @@ define('PERMISSIONS_CATALOG', [
 // Default Role Mappings
 define('ROLE_PERMISSIONS_DEFAULT', [
     'admin' => array_keys(PERMISSIONS_CATALOG),
-    'manager' => [
-        'dashboard.view', 'users.view', 'users.create', 'users.update', 'branches.view', 'floors.view',
-        'floors.manage', 'tables.view', 'tables.create', 'tables.update', 'tables.manage', 'tables.status_update',
-        'dining_sessions.view', 'dining_sessions.create', 'dining_sessions.transfer', 'dining_sessions.close',
-        'menu.view', 'menu.manage', 'menus.view', 'menus.manage', 'categories.view', 'categories.manage',
-        'products.view', 'products.create', 'products.update', 'products.delete', 'products.manage_availability',
-        'variants.manage', 'modifiers.manage',
-        'orders.view', 'orders.create', 'orders.update', 'orders.submit', 'orders.change_status', 'orders.cancel', 'order_items.manage',
-        'kitchen.view', 'kitchen.manage', 'kds.view', 'kds.manage', 'kds.start', 'kds.ready', 'kds.served', 'kds.cancel', 'kds.recall', 'kds.refire', 'kds.override', 'kds.history.view',
-        'routing.view', 'routing.manage', 'routing.dispatch', 'routing.override', 'routing.cancel', 'routing.retry',
-        'stations.view', 'stations.manage', 'stations.pause', 'stations.activate', 'tickets.view', 'tickets.manage', 'tickets.reprint',
-        'payments.view', 'payments.create', 'payments.process', 'payments.update', 'payments.void', 'payments.refund', 'payments.refund_approve', 'payments.reconcile',
-        'billing.view', 'billing.manage', 'receipts.view', 'receipts.reprint', 'invoices.view', 'invoices.reprint', 'payment_methods.view', 'payment_methods.manage',
-        'waiters.view', 'waiters.manage', 'waiters.assign', 'commissions.view', 'commissions.rules.manage', 'commissions.approve', 'commissions.pay',
-        'inventory.view', 'inventory.manage', 'inventory.adjust', 'inventory.wastage', 'inventory.transfer', 'inventory.history.view',
-        'ingredients.manage', 'recipes.manage', 'recipes.cost.view', 'suppliers.manage', 'purchases.manage', 'purchases.approve', 'purchases.receive',
-        'reports.view', 'reports.export', 'settings.view',
-        'customers.view', 'customers.create', 'customers.update', 'customers.manage',
-        'reservations.view', 'reservations.create', 'reservations.update', 'reservations.confirm', 'reservations.seat', 'reservations.cancel', 'reservations.no_show',
-        'loyalty.view', 'loyalty.manage', 'loyalty.adjust', 'loyalty.redeem', 'loyalty.rules.manage',
-        'coupons.view', 'coupons.create', 'coupons.update', 'coupons.manage', 'coupons.redeem', 'coupons.usage.view',
-        'promotions.view', 'promotions.create', 'promotions.update', 'promotions.manage',
-        'qr.view', 'qr.manage', 'qr.generate', 'qr.regenerate', 'qr.revoke', 'qr.orders.view'
-    ],
+    'manager' => array_keys(PERMISSIONS_CATALOG),
     'reception' => [
         'dashboard.view', 'branches.view', 'floors.view', 'tables.view', 'tables.status_update',
         'dining_sessions.view', 'dining_sessions.create', 'dining_sessions.transfer', 'dining_sessions.close',
-        'menu.view', 'products.view', 'products.manage_availability', 'orders.view', 'orders.create', 'orders.submit', 'orders.change_status',
-        'kds.view', 'kds.served', 'kds.history.view',
-        'routing.view', 'routing.dispatch', 'stations.view', 'tickets.view',
-        'payments.view', 'payments.create', 'payments.process', 'billing.view', 'receipts.view', 'receipts.reprint', 'invoices.view', 'payment_methods.view',
+        'menu.view', 'categories.view', 'products.view', 'products.manage_availability',
+        'orders.view', 'orders.create', 'orders.submit', 'orders.change_status', 'orders.cancel', 'order_items.manage',
+        'kds.view', 'kds.manage', 'kds.served', 'kds.history.view',
+        'routing.view', 'routing.dispatch', 'stations.view', 'tickets.view', 'tickets.manage', 'tickets.reprint',
+        'payments.view', 'payments.create', 'payments.process', 'payments.update', 'payments.void', 'payments.refund',
+        'billing.view', 'billing.manage', 'receipts.view', 'receipts.reprint', 'invoices.view', 'payment_methods.view',
+        'shifts.view', 'shifts.open', 'shifts.close', 'cash.view', 'cash.in', 'cash.out',
         'customers.view', 'customers.create', 'customers.update',
         'reservations.view', 'reservations.create', 'reservations.update', 'reservations.confirm', 'reservations.seat', 'reservations.cancel', 'reservations.no_show',
         'loyalty.view', 'loyalty.redeem', 'coupons.view', 'coupons.redeem'
     ],
     'waiter' => [
         'branches.view', 'floors.view', 'tables.view', 'tables.status_update', 'dining_sessions.view',
-        'dining_sessions.create', 'dining_sessions.transfer', 'menu.view', 'products.view', 'orders.view', 'orders.create',
-        'orders.update', 'orders.submit', 'order_items.manage', 'commissions.view',
-        'customers.view', 'customers.create', 'reservations.view', 'loyalty.view', 'coupons.redeem'
+        'dining_sessions.create', 'dining_sessions.transfer', 'menu.view', 'categories.view', 'products.view',
+        'orders.view', 'orders.create', 'orders.update', 'orders.submit', 'orders.change_status', 'order_items.manage',
+        'commissions.view', 'customers.view', 'customers.create', 'reservations.view', 'loyalty.view', 'coupons.redeem',
+        'stations.view', 'kds.view', 'tickets.view', 'payments.view', 'billing.view'
     ],
     'kitchen' => [
-        'kitchen.view', 'kitchen.manage', 'kds.view', 'kds.start', 'kds.ready', 'kds.served', 'kds.history.view', 'tickets.view', 'tickets.manage',
+        'kitchen.view', 'kitchen.manage', 'kds.view', 'kds.manage', 'kds.start', 'kds.ready', 'kds.served', 'kds.cancel',
+        'kds.recall', 'kds.refire', 'kds.override', 'kds.history.view', 'tickets.view', 'tickets.manage', 'tickets.reprint',
+        'stations.view', 'stations.pause', 'stations.activate', 'routing.view', 'orders.view', 'orders.change_status',
         'inventory.view', 'inventory.wastage', 'recipes.cost.view'
     ]
 ]);
+

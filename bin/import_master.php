@@ -37,6 +37,9 @@ try {
     $validHash = Auth::hashPassword('amer25');
     $db->exec("UPDATE users SET password_hash = '{$validHash}' WHERE email IN ('admin@smartresta.com', 'manager@smartresta.com', 'reception@smartresta.com', 'waiter@smartresta.com', 'kitchen@smartresta.com');");
 
+    // Seed RBAC permissions and role mappings
+    require_once __DIR__ . '/seed_rbac.php';
+
     echo "========================================================================\n";
     echo "SUCCESS: Master database imported cleanly into Railway MySQL!\n";
     echo "Verified Admin Password: amer25\n";

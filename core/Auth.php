@@ -119,18 +119,18 @@ class Auth {
             $permissions = [];
         }
 
-        if (empty($permissions)) {
-            $roleKey = strtolower($roleName);
-            if (strpos($roleKey, 'admin') !== false) $roleKey = 'admin';
-            elseif (strpos($roleKey, 'manager') !== false) $roleKey = 'manager';
-            elseif (strpos($roleKey, 'reception') !== false || strpos($roleKey, 'cashier') !== false) $roleKey = 'reception';
-            elseif (strpos($roleKey, 'waiter') !== false) $roleKey = 'waiter';
-            elseif (strpos($roleKey, 'chef') !== false || strpos($roleKey, 'kitchen') !== false) $roleKey = 'kitchen';
+        $roleKey = strtolower(trim($roleName));
+        if (strpos($roleKey, 'admin') !== false) $roleKey = 'admin';
+        elseif (strpos($roleKey, 'manager') !== false) $roleKey = 'manager';
+        elseif (strpos($roleKey, 'reception') !== false || strpos($roleKey, 'cashier') !== false) $roleKey = 'reception';
+        elseif (strpos($roleKey, 'waiter') !== false) $roleKey = 'waiter';
+        elseif (strpos($roleKey, 'chef') !== false || strpos($roleKey, 'kitchen') !== false) $roleKey = 'kitchen';
 
-            $permissions = ROLE_PERMISSIONS_DEFAULT[$roleKey] ?? [];
-        }
+        $defaultPerms = ROLE_PERMISSIONS_DEFAULT[$roleKey] ?? [];
+        $permissions = array_unique(array_merge($permissions, $defaultPerms));
 
         $_SESSION['permissions'] = $permissions;
+        $_SESSION['role_key'] = $roleKey;
     }
 
     public static function check() {
@@ -164,18 +164,33 @@ class Auth {
         self::initSession();
         if (!self::check()) return false;
 
-        // Admin has full system access
+        // Admins and Managers have full access
         $role = strtolower(trim($_SESSION['user_role'] ?? ''));
-        if ($role === 'admin' || $role === 'system administrator') return true;
+        if (strpos($role, 'admin') !== false || strpos($role, 'administrator') !== false || strpos($role, 'manager') !== false) {
+            return true;
+        }
 
         $userPermissions = $_SESSION['permissions'] ?? [];
-        return in_array($permissionName, $userPermissions, true);
+        if (in_array($permissionName, $userPermissions, true)) {
+            return true;
+        }
+
+        // Secondary check against role defaults
+        $roleKey = $_SESSION['role_key'] ?? '';
+        if (empty($roleKey)) {
+            if (strpos($role, 'reception') !== false || strpos($role, 'cashier') !== false) $roleKey = 'reception';
+            elseif (strpos($role, 'waiter') !== false) $roleKey = 'waiter';
+            elseif (strpos($role, 'chef') !== false || strpos($role, 'kitchen') !== false) $roleKey = 'kitchen';
+        }
+
+        $defaultPerms = ROLE_PERMISSIONS_DEFAULT[$roleKey] ?? [];
+        return in_array($permissionName, $defaultPerms, true);
     }
 
     public static function requireAuth() {
         self::initSession();
         if (!self::check()) {
-            if (self::isAjax()) {
+            if (self::isApiOrJson()) {
                 Response::json(false, 401, "Authentication required. Please log in.");
             } else {
                 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
@@ -190,7 +205,7 @@ class Auth {
         self::requireAuth();
         if (!self::hasPermission($permissionName)) {
             AuditLogger::log('AUTHORIZATION_DENIED', 'Auth', null, null, ['required_permission' => $permissionName]);
-            if (self::isAjax()) {
+            if (self::isApiOrJson()) {
                 Response::json(false, 403, "Forbidden: You do not have permission [{$permissionName}] to perform this action.");
             } else {
                 http_response_code(403);
@@ -216,8 +231,18 @@ class Auth {
         session_destroy();
     }
 
-    private static function isAjax() {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    private static function isApiOrJson() {
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            return true;
+        }
+        $uri = $_SERVER['REQUEST_URI'] ?? ($_SERVER['SCRIPT_NAME'] ?? '');
+        if (strpos($uri, '/api/') !== false) {
+            return true;
+        }
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        if (strpos($accept, 'application/json') !== false) {
+            return true;
+        }
+        return false;
     }
 }
