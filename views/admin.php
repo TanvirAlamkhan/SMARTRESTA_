@@ -1,5 +1,5 @@
 <!-- VIEW 1: ADMIN / MANAGER DASHBOARD -->
-<section id="admin-view" class="role-view">
+<section id="admin" class="role-view">
   <div class="grid-kpi" id="kpi-container">
     <div class="kpi-card">
       <span class="kpi-label">Today Net Sales</span>

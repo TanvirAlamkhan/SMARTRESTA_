@@ -1,5 +1,5 @@
 <!-- VIEW: FINANCE, SHIFTS & DAY CLOSING (Prompt 13) -->
-<section id="finance-view" class="role-view" style="display:none;">
+<section id="finance" class="role-view" style="display:none;">
 
   <!-- Active Shift Banner -->
   <div id="active-shift-banner" style="margin-bottom:20px;"></div>

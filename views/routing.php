@@ -1,5 +1,5 @@
 <!-- VIEW: STATION ROUTING ENGINE & TICKET DISPATCH -->
-<section id="routing-view" class="role-view" style="display:none;">
+<section id="routing" class="role-view" style="display:none;">
   <div class="card">
     <div class="card-header">
       <div>

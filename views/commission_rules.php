@@ -1,5 +1,5 @@
 <!-- VIEW: COMMISSION RULES CONFIGURATION -->
-<section id="commission-rules-view" class="role-view" style="display:none;">
+<section id="commission-rules" class="role-view" style="display:none;">
   <div class="card">
     <div class="card-header">
       <div>

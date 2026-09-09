@@ -337,7 +337,7 @@ const SmartFinance = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('reports-view') || document.getElementById('finance-view')) {
+  if (document.getElementById('reports') || document.getElementById('reports-view') || document.getElementById('finance') || document.getElementById('finance-view')) {
     SmartFinance.init();
   }
 });

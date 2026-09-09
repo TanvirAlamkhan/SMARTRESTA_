@@ -1,5 +1,5 @@
 <!-- VIEW: CRM, RESERVATIONS, LOYALTY, COUPONS & QR ORDERING (Prompt 14) -->
-<section id="crm-view" class="role-view" style="display:none;">
+<section id="crm" class="role-view" style="display:none;">
 
   <!-- CRM Navigation Sub-Tabs -->
   <div class="card" style="margin-bottom:20px; padding:12px 20px;">

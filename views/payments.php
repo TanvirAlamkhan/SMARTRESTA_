@@ -1,5 +1,5 @@
 <!-- VIEW: BILLING & PAYMENT SETTLEMENT HISTORY -->
-<section id="payments-view" class="role-view" style="display:none;">
+<section id="payments" class="role-view" style="display:none;">
   <div class="card">
     <div class="card-header" style="flex-wrap:wrap; gap:12px;">
       <div>

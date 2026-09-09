@@ -95,65 +95,65 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
 
     <nav class="sidebar-nav">
       <div class="nav-section-title">OPERATIONS</div>
-      <a href="#admin-view" class="nav-item active" onclick="switchRoleView('admin-view', this)">
+      <a href="admin.php" class="nav-item active" onclick="switchRoleView('admin', this)">
         <span class="nav-icon">📊</span>
         <span>Manager Dashboard</span>
       </a>
-      <a href="#tables-view" class="nav-item" onclick="switchRoleView('tables-view', this)">
+      <a href="tables.php" class="nav-item" onclick="switchRoleView('tables', this)">
         <span class="nav-icon">🪑</span>
         <span>Floors & Dining Tables</span>
       </a>
-      <a href="#menu-view" class="nav-item" onclick="switchRoleView('menu-view', this)">
+      <a href="menu.php" class="nav-item" onclick="switchRoleView('menu', this)">
         <span class="nav-icon">🍔</span>
         <span>Menu & Product Catalog</span>
       </a>
-      <a href="#pos-view" class="nav-item" onclick="switchRoleView('pos-view', this)">
+      <a href="pos.php" class="nav-item" onclick="switchRoleView('pos', this)">
         <span class="nav-icon">💳</span>
         <span>POS & Waiter Ordering</span>
       </a>
-      <a href="#kds-view" class="nav-item" onclick="switchRoleView('kds-view', this); SmartKDS.loadKDSGrid();">
+      <a href="kds.php" class="nav-item" onclick="switchRoleView('kds', this); SmartKDS.loadKDSGrid();">
         <span class="nav-icon">🍳</span>
         <span>Kitchen Display (KDS)</span>
       </a>
-      <a href="#routing-view" class="nav-item" onclick="switchRoleView('routing-view', this); SmartRouting.loadStationQueue();">
+      <a href="#routing" class="nav-item" onclick="switchRoleView('routing', this); SmartRouting.loadStationQueue();">
         <span class="nav-icon">🔀</span>
         <span>Station Routing Engine</span>
       </a>
-      <a href="#payments-view" class="nav-item" onclick="switchRoleView('payments-view', this); SmartBilling.loadPaymentHistory();">
+      <a href="payments.php" class="nav-item" onclick="switchRoleView('payments', this); SmartBilling.loadPaymentHistory();">
         <span class="nav-icon">💰</span>
         <span>Billing & Payments History</span>
       </a>
-      <a href="#commission-rules-view" class="nav-item" onclick="switchRoleView('commission-rules-view', this); SmartCommissions.loadCommissionRules();">
+      <a href="#commission-rules" class="nav-item" onclick="switchRoleView('commission-rules', this); SmartCommissions.loadCommissionRules();">
         <span class="nav-icon">📜</span>
         <span>Commission Rules Engine</span>
       </a>
-      <a href="#commissions-review-view" class="nav-item" onclick="switchRoleView('commissions-review-view', this); SmartCommissions.loadCommissionsReview();">
+      <a href="#commissions-review" class="nav-item" onclick="switchRoleView('commissions-review', this); SmartCommissions.loadCommissionsReview();">
         <span class="nav-icon">📑</span>
         <span>Commission Review & Approvals</span>
       </a>
-      <a href="#payouts-view" class="nav-item" onclick="switchRoleView('payouts-view', this); SmartCommissions.loadPayoutHistory();">
+      <a href="#payouts" class="nav-item" onclick="switchRoleView('payouts', this); SmartCommissions.loadPayoutHistory();">
         <span class="nav-icon">💵</span>
         <span>Commission Payout Settlements</span>
       </a>
 
       <div class="nav-section-title" style="margin-top:16px;">ADMIN & ACCESS</div>
-      <a href="#users-view" class="nav-item" onclick="switchRoleView('users-view', this)">
+      <a href="users.php" class="nav-item" onclick="switchRoleView('users', this)">
         <span class="nav-icon">👥</span>
         <span>Users & Staff Roles</span>
       </a>
-      <a href="#inventory-view" class="nav-item" onclick="switchRoleView('inventory-view', this); SmartInventory.init();">
+      <a href="inventory.php" class="nav-item" onclick="switchRoleView('inventory', this); SmartInventory.init();">
         <span class="nav-icon">📦</span>
         <span>Stock & Ingredients</span>
       </a>
-      <a href="#reports-view" class="nav-item" onclick="switchRoleView('reports-view', this); SmartReports.loadCurrentTab();">
+      <a href="reports.php" class="nav-item" onclick="switchRoleView('reports', this); SmartReports.loadCurrentTab();">
         <span class="nav-icon">📈</span>
         <span>Reports & Analytics</span>
       </a>
-      <a href="#finance-view" class="nav-item" onclick="switchRoleView('finance-view', this); SmartFinance.init();">
+      <a href="finance.php" class="nav-item" onclick="switchRoleView('finance', this); SmartFinance.init();">
         <span class="nav-icon">💵</span>
         <span>Finance, Shifts & Day Close</span>
       </a>
-      <a href="#crm-view" class="nav-item" onclick="switchRoleView('crm-view', this); SmartCRM.init();">
+      <a href="crm.php" class="nav-item" onclick="switchRoleView('crm', this); SmartCRM.init();">
         <span class="nav-icon">🤝</span>
         <span>CRM & QR Ordering</span>
       </a>
@@ -1506,58 +1506,68 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
 
 <script>
 function switchRoleView(viewId, navEl) {
+  const cleanId = (viewId || 'admin').replace(/-view$/, '');
+
   document.querySelectorAll('.role-view').forEach(view => view.style.display = 'none');
   document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-  
-  document.getElementById(viewId).style.display = 'block';
-  if (navEl) navEl.classList.add('active');
+
+  const target = document.getElementById(cleanId) || document.getElementById(cleanId + '-view');
+  if (target) target.style.display = 'block';
+
+  if (navEl) {
+    navEl.classList.add('active');
+  } else {
+    const link = document.querySelector(`.sidebar-nav a[href="#${cleanId}"], .sidebar-nav a[href="${cleanId}.php"]`);
+    if (link) link.classList.add('active');
+  }
 
   const titles = {
-    'admin-view': 'Manager Dashboard',
-    'tables-view': 'Restaurant Floor Map & Tables',
-    'menu-view': 'Restaurant Menu, Categories & Product Catalog',
-    'pos-view': 'POS & Waiter Ordering',
-    'kds-view': 'Kitchen Display System (KDS)',
-    'users-view': 'Users & Staff Role Permissions',
-    'routing-view': 'Smart Order Routing & Station Dispatch',
-    'payments-view': 'Billing Engine & Settlement History',
-    'commission-rules-view': 'Configurable Commission Rules Engine',
-    'commissions-review-view': 'Commission Transaction Review & Approvals',
-    'payouts-view': 'Commission Payout Settlements History',
-    'inventory-view': 'Inventory, Purchasing, Recipe Costing & Stock Control Engine',
-    'reports-view': 'Reports & Operational Analytics',
-    'finance-view': 'Finance, Shifts & Day Closing Engine',
-    'crm-view': 'CRM, Reservations, Loyalty, Coupons & QR Ordering Engine'
+    'admin': 'Manager Dashboard',
+    'tables': 'Restaurant Floor Map & Tables',
+    'menu': 'Restaurant Menu, Categories & Product Catalog',
+    'pos': 'POS & Waiter Ordering',
+    'kds': 'Kitchen Display System (KDS)',
+    'users': 'Users & Staff Role Permissions',
+    'routing': 'Smart Order Routing & Station Dispatch',
+    'payments': 'Billing Engine & Settlement History',
+    'commission-rules': 'Configurable Commission Rules Engine',
+    'commissions-review': 'Commission Transaction Review & Approvals',
+    'payouts': 'Commission Payout Settlements History',
+    'inventory': 'Inventory, Purchasing, Recipe Costing & Stock Control Engine',
+    'reports': 'Reports & Operational Analytics',
+    'finance': 'Finance, Shifts & Day Closing Engine',
+    'crm': 'CRM, Reservations, Loyalty, Coupons & QR Ordering Engine'
   };
-  document.getElementById('view-title').textContent = titles[viewId] || 'SMARTRESTA';
+  const titleEl = document.getElementById('view-title');
+  if (titleEl) titleEl.textContent = titles[cleanId] || titles[viewId] || 'SMARTRESTA';
 
-  if (viewId === 'tables-view') {
+  if (cleanId === 'tables') {
     loadFloorTables();
-  } else if (viewId === 'pos-view') {
+  } else if (cleanId === 'pos') {
     loadPOSProducts();
     loadPOSTableSelector();
-  } else if (viewId === 'menu-view') {
+  } else if (cleanId === 'menu') {
     loadCategoryOptions();
     loadProductCatalog();
-  } else if (viewId === 'users-view') {
+  } else if (cleanId === 'users') {
     loadUsersList();
-  } else if (viewId === 'payments-view') {
+  } else if (cleanId === 'payments') {
     SmartBilling.loadPaymentHistory();
-  } else if (viewId === 'commission-rules-view') {
+  } else if (cleanId === 'commission-rules') {
     SmartCommissions.loadCommissionRules();
-  } else if (viewId === 'commissions-review-view') {
+  } else if (cleanId === 'commissions-review') {
     SmartCommissions.loadCommissionsReview();
-  } else if (viewId === 'payouts-view') {
+  } else if (cleanId === 'payouts') {
     SmartCommissions.loadPayoutHistory();
-  } else if (viewId === 'kds-view') {
+  } else if (cleanId === 'kds') {
     SmartKDS.loadKDSGrid();
-  } else if (viewId === 'inventory-view') {
+  } else if (cleanId === 'inventory') {
     SmartInventory.init();
-  } else if (viewId === 'reports-view') {
+  } else if (cleanId === 'reports') {
     SmartReports.loadCurrentTab();
-  } else if (viewId === 'finance-view') {
+  } else if (cleanId === 'finance') {
     SmartFinance.init();
-  } else if (viewId === 'crm-view') {
+  } else if (cleanId === 'crm') {
     SmartCRM.init();
   }
 }
@@ -2222,37 +2232,24 @@ async function submitCreateStation() {
 window.CURRENT_USER_ROLE = "<?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8') ?>";
 
 document.addEventListener('DOMContentLoaded', () => {
-  const roleAllowedViews = {
-    'admin': ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'],
-  const ALL_VIEWS = ['admin-view', 'tables-view', 'menu-view', 'pos-view', 'kds-view', 'routing-view', 'payments-view', 'commission-rules-view', 'commissions-review-view', 'payouts-view', 'users-view', 'inventory-view', 'reports-view', 'finance-view', 'crm-view'];
+  const ALL_VIEWS = ['admin', 'tables', 'menu', 'pos', 'kds', 'routing', 'payments', 'commission-rules', 'commissions-review', 'payouts', 'users', 'inventory', 'reports', 'finance', 'crm'];
 
-  // ── Priority-based role resolution (works regardless of exact DB role name) ──
-  // Admin / Manager → full access to everything
-  // Reception / Cashier → customer-facing + payments
-  // Waiter → POS + tables + payments
-  // Kitchen / Chef → KDS + routing + inventory
-  // Default (unknown) → POS + tables (safe minimal set)
   function resolveRoleAccess(roleStr) {
     const r = (roleStr || '').toLowerCase().trim();
 
-    // ADMIN / MANAGER (full access) — catches: admin, system administrator, manager, branch manager, restaurant manager, general manager, head manager etc.
     if (r.includes('admin') || r.includes('manager')) {
       return { views: ALL_VIEWS, isFullAccess: true };
     }
-    // KITCHEN / CHEF
     if (r.includes('kitchen') || r.includes('chef') || r.includes('cook')) {
-      return { views: ['kds-view', 'routing-view', 'inventory-view'], isFullAccess: false };
+      return { views: ['kds', 'routing', 'inventory'], isFullAccess: false };
     }
-    // RECEPTION / CASHIER / FRONT DESK
     if (r.includes('reception') || r.includes('cashier') || r.includes('front')) {
-      return { views: ['tables-view', 'pos-view', 'kds-view', 'payments-view', 'crm-view'], isFullAccess: false };
+      return { views: ['tables', 'pos', 'kds', 'payments', 'crm'], isFullAccess: false };
     }
-    // WAITER / SERVER
     if (r.includes('waiter') || r.includes('server') || r.includes('steward')) {
-      return { views: ['pos-view', 'tables-view', 'menu-view', 'payments-view', 'payouts-view'], isFullAccess: false };
+      return { views: ['pos', 'tables', 'menu', 'payments', 'payouts'], isFullAccess: false };
     }
-    // Default: POS + Tables
-    return { views: ['pos-view', 'tables-view'], isFullAccess: false };
+    return { views: ['pos', 'tables'], isFullAccess: false };
   }
 
   const userRoleKey = window.CURRENT_USER_ROLE || '';
@@ -2261,15 +2258,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Filter sidebar navigation links according to role permissions
   document.querySelectorAll('.sidebar-nav a.nav-item').forEach(link => {
     const href = link.getAttribute('href');
-    if (href && href.startsWith('#')) {
-      const viewId = href.replace('#', '');
-      link.style.display = allowedList.includes(viewId) ? 'flex' : 'none';
+    if (href) {
+      const cleanHref = href.replace('#', '').replace('.php', '').replace(/-view$/, '');
+      const isAllowed = allowedList.some(v => v === cleanHref || v + '-view' === cleanHref || v === cleanHref + '-view');
+      link.style.display = isAllowed ? 'flex' : 'none';
     }
   });
 
-  // Navigate to initial view for this role
-  const initialView = allowedList[0] || 'pos-view';
-  const targetNavLink = document.querySelector(`.sidebar-nav a[href="#${initialView}"]`);
+  // Navigate to initial view for this role or hash fragment if specified
+  let initialView = allowedList[0] || 'pos';
+  if (window.location.hash) {
+    const hashClean = window.location.hash.replace('#', '').replace(/-view$/, '');
+    if (allowedList.includes(hashClean) || isFullAccess) {
+      initialView = hashClean;
+    }
+  } else if (window.INITIAL_ACTIVE_SECTION) {
+    initialView = window.INITIAL_ACTIVE_SECTION;
+  }
+
+  const targetNavLink = document.querySelector(`.sidebar-nav a[href="#${initialView}"], .sidebar-nav a[href="${initialView}.php"]`);
   switchRoleView(initialView, targetNavLink);
 
   // Load operational data for all authenticated roles (Waiters, Staff, Managers, Admins)

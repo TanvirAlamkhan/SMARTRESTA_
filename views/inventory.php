@@ -1,5 +1,5 @@
 <!-- VIEW: INVENTORY & STOCK CONTROL -->
-<section id="inventory-view" class="role-view" style="display:none;">
+<section id="inventory" class="role-view" style="display:none;">
   <!-- Inventory Top Bar Sub-Navigation -->
   <div class="card" style="margin-bottom:20px; padding:16px 20px;">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">

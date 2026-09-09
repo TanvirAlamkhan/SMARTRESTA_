@@ -554,7 +554,7 @@ const SmartCRM = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('crm-view')) {
+  if (document.getElementById('crm') || document.getElementById('crm-view')) {
     SmartCRM.init();
   }
 });

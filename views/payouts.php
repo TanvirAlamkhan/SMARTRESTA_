@@ -1,5 +1,5 @@
 <!-- VIEW: COMMISSION PAYOUT SETTLEMENTS -->
-<section id="payouts-view" class="role-view" style="display:none;">
+<section id="payouts" class="role-view" style="display:none;">
   <div class="card">
     <div class="card-header">
       <div>

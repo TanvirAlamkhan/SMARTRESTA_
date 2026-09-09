@@ -1,5 +1,5 @@
 <!-- VIEW: RESTAURANT MENU & PRODUCT CATALOG -->
-<section id="menu-view" class="role-view" style="display:none;">
+<section id="menu" class="role-view" style="display:none;">
   <div class="card">
     <div class="card-header">
       <div>

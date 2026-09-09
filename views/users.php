@@ -1,5 +1,5 @@
 <!-- VIEW 5: USER & ROLE MANAGEMENT -->
-<section id="users-view" class="role-view" style="display:none;">
+<section id="users" class="role-view" style="display:none;">
   <div class="card">
     <div class="card-header">
       <div>

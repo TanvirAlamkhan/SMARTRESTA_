@@ -1,5 +1,5 @@
 <!-- VIEW 3: POS & WAITER ORDERING -->
-<section id="pos-view" class="role-view" style="display:none;">
+<section id="pos" class="role-view" style="display:none;">
   <div class="pos-layout">
     <div>
       <!-- POS Table Selector -->

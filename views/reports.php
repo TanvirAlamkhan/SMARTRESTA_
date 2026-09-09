@@ -1,5 +1,5 @@
 <!-- VIEW: REPORTS & ANALYTICS DASHBOARD (Prompt 12) -->
-<section id="reports-view" class="role-view" style="display:none;">
+<section id="reports" class="role-view" style="display:none;">
 
   <!-- Global Date/Time Range Filter Toolbar -->
   <div class="card" style="margin-bottom:20px; padding:16px 20px;">

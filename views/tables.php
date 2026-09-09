@@ -1,5 +1,5 @@
 <!-- VIEW 2: RESTAURANT FLOORS & DINING TABLES MAP -->
-<section id="tables-view" class="role-view" style="display:none;">
+<section id="tables" class="role-view" style="display:none;">
   <div class="card">
     <div class="card-header">
       <div>

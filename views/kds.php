@@ -1,5 +1,5 @@
 <!-- VIEW 4: KITCHEN DISPLAY SYSTEM (KDS) -->
-<section id="kds-view" class="role-view" style="display:none;">
+<section id="kds" class="role-view" style="display:none;">
   <div id="kds-connection-banner" class="alert alert-danger" style="display:none; margin-bottom:16px; font-weight:600;"></div>
 
   <div class="card" style="margin-bottom:20px;">

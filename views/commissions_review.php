@@ -1,5 +1,5 @@
 <!-- VIEW: COMMISSION TRANSACTION REVIEW & APPROVALS -->
-<section id="commissions-review-view" class="role-view" style="display:none;">
+<section id="commissions-review" class="role-view" style="display:none;">
   <div class="card">
     <div class="card-header">
       <div>
