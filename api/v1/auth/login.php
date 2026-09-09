@@ -33,6 +33,16 @@ if (!RateLimiter::check($email)) {
     Response::json(false, 429, "Too many failed login attempts. Please try again in 15 minutes.");
 }
 
+// Check Database Connectivity
+try {
+    $db = Database::getConnection();
+    if (!$db) {
+        Response::json(false, 500, "Database connection unavailable. Please start MySQL service in XAMPP or check database settings.");
+    }
+} catch (Exception $e) {
+    Response::json(false, 500, "Database Connection Error: " . $e->getMessage());
+}
+
 // Authenticate via Auth Engine
 $user = Auth::login($email, $password);
 

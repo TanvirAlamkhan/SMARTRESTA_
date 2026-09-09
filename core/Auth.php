@@ -162,7 +162,9 @@ class Auth {
             if (self::isAjax()) {
                 Response::json(false, 401, "Authentication required. Please log in.");
             } else {
-                header("Location: landing.php");
+                $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+                $loginUrl = (strpos($scriptName, '/public/') !== false) ? 'login.php' : 'public/login.php';
+                header("Location: " . $loginUrl);
                 exit;
             }
         }

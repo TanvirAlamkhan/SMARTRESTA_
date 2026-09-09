@@ -56,8 +56,9 @@ const SmartAPI = {
       const response = await fetch(endpoint, config);
       const data = await this.safeParseJSON(response);
 
-      // Handle Unauthenticated Status (401)
-      if (response.status === 401 || data.statusCode === 401 || (data.message && data.message.includes('Authentication required'))) {
+      // Handle Unauthenticated Status (401) for non-login endpoints
+      const isAuthEndpoint = endpoint.includes('/auth/login') || endpoint.includes('auth/login.php');
+      if (!isAuthEndpoint && (response.status === 401 || data.statusCode === 401 || (data.message && data.message.includes('Authentication required')))) {
         if (!this.isRedirecting) {
           this.isRedirecting = true;
           if (window.SmartNotifications && typeof window.SmartNotifications.show === 'function') {

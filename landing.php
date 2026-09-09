@@ -458,16 +458,11 @@ $currentUser = Auth::user();
 
 <!-- Hero Section -->
 <section class="hero">
-  <div class="hero-badge">
-    <span>🛡️ PROMPT 16 CERTIFIED</span>
-    <span>•</span>
-    <span>100% PRODUCTION READY</span>
-  </div>
   <h1>Restaurant Operations, POS & Performance OS</h1>
   <p>An enterprise-grade, zero-mock restaurant management platform. Powering multi-counter order routing, floor table management, waiter commissions, kitchen production (KDS), recipe BOM inventory costing, and real-time financial reporting.</p>
 
   <div class="hero-buttons">
-    <a href="index.php" class="btn-hero-primary">🚀 Launch Management App</a>
+    <a href="<?= $isLoggedIn ? 'index.php' : 'public/login.php' ?>" class="btn-hero-primary">🚀 Launch Management App</a>
     <a href="public/login.php" class="btn-hero-secondary">🔐 Staff Login Portal</a>
     <a href="public/qr.html" class="btn-hero-secondary" target="_blank">📱 Customer QR Menu</a>
   </div>
