@@ -157,7 +157,7 @@ class Auth {
             if (self::isAjax()) {
                 Response::json(false, 401, "Authentication required. Please log in.");
             } else {
-                header("Location: public/login.php");
+                header("Location: landing.php");
                 exit;
             }
         }
