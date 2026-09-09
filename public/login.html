@@ -154,7 +154,7 @@ async function handleLogin(e) {
       }, 500);
     }
   } catch (err) {
-    alertEl.textContent = 'Invalid login credentials.';
+    alertEl.textContent = err.message || 'Invalid login credentials.';
     alertEl.style.display = 'block';
   } finally {
     btn.disabled = false;
