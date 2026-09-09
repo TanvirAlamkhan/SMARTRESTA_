@@ -58,8 +58,9 @@ try {
             continue;
         }
 
-        // Clean DELIMITER lines for PDO compatibility
-        $sqlCleaned = preg_replace('/DELIMITER\s+\/\//i', '', $sql);
+        // Clean DELIMITER and USE statements for PDO & Railway database compatibility
+        $sqlCleaned = preg_replace('/USE\s+`?[a-zA-Z0-9_]+`?\s*;/i', '', $sql);
+        $sqlCleaned = preg_replace('/DELIMITER\s+\/\//i', '', $sqlCleaned);
         $sqlCleaned = preg_replace('/DELIMITER\s+;/i', '', $sqlCleaned);
         $sqlCleaned = str_replace('//', ';', $sqlCleaned);
 
