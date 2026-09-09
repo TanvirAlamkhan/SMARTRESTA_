@@ -116,8 +116,18 @@ class Auth {
 
             $permissions = array_column($rows, 'name');
         } catch (Exception $e) {
-            // Fallback to default catalog mapping if DB mappings empty
-            $permissions = ROLE_PERMISSIONS_DEFAULT[$roleName] ?? [];
+            $permissions = [];
+        }
+
+        if (empty($permissions)) {
+            $roleKey = strtolower($roleName);
+            if (strpos($roleKey, 'admin') !== false) $roleKey = 'admin';
+            elseif (strpos($roleKey, 'manager') !== false) $roleKey = 'manager';
+            elseif (strpos($roleKey, 'reception') !== false || strpos($roleKey, 'cashier') !== false) $roleKey = 'reception';
+            elseif (strpos($roleKey, 'waiter') !== false) $roleKey = 'waiter';
+            elseif (strpos($roleKey, 'chef') !== false || strpos($roleKey, 'kitchen') !== false) $roleKey = 'kitchen';
+
+            $permissions = ROLE_PERMISSIONS_DEFAULT[$roleKey] ?? [];
         }
 
         $_SESSION['permissions'] = $permissions;
@@ -155,7 +165,8 @@ class Auth {
         if (!self::check()) return false;
 
         // Admin has full system access
-        if ($_SESSION['user_role'] === 'admin') return true;
+        $role = strtolower(trim($_SESSION['user_role'] ?? ''));
+        if ($role === 'admin' || $role === 'system administrator') return true;
 
         $userPermissions = $_SESSION['permissions'] ?? [];
         return in_array($permissionName, $userPermissions, true);
