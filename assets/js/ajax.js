@@ -41,6 +41,11 @@ const SmartAPI = {
   },
 
   async request(endpoint, options = {}) {
+    let targetUrl = endpoint;
+    if (window.location.pathname.includes('/public/') && !targetUrl.startsWith('/') && !targetUrl.startsWith('http') && !targetUrl.startsWith('../')) {
+      targetUrl = '../' + targetUrl;
+    }
+
     const defaultHeaders = {
       'Content-Type': 'application/json',
       'X-Requested-With': 'XMLHttpRequest'
@@ -53,11 +58,11 @@ const SmartAPI = {
     };
 
     try {
-      const response = await fetch(endpoint, config);
+      const response = await fetch(targetUrl, config);
       const data = await this.safeParseJSON(response);
 
-      // Handle Unauthenticated Status (401) for non-login endpoints
-      const isAuthEndpoint = endpoint.includes('/auth/login') || endpoint.includes('auth/login.php');
+      // Handle Unauthenticated Status (401) for non-login/logout endpoints
+      const isAuthEndpoint = targetUrl.includes('/auth/login') || targetUrl.includes('auth/login.php') || targetUrl.includes('auth/logout');
       if (!isAuthEndpoint && (response.status === 401 || data.statusCode === 401 || (data.message && data.message.includes('Authentication required')))) {
         if (!this.isRedirecting) {
           this.isRedirecting = true;

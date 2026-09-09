@@ -157,6 +157,11 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
         <span class="nav-icon">🤝</span>
         <span>CRM & QR Ordering</span>
       </a>
+      <div class="nav-section-title" style="margin-top:16px;">ACCOUNT</div>
+      <a href="javascript:void(0)" class="nav-item" onclick="handleLogout()" style="color: var(--danger-color, #ef4444);">
+        <span class="nav-icon">🔒</span>
+        <span>Sign Out / Logout</span>
+      </a>
     </nav>
   </aside>
 
@@ -361,6 +366,7 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
               <select id="pos-table-selector" class="form-control" style="max-width:200px;" onchange="onPOSTableSelected()">
                 <option value="">— Pick a table —</option>
               </select>
+              <button class="btn btn-secondary btn-sm" onclick="SmartPOS.selectTakeaway()">🛍️ Takeaway / Walk-in</button>
               <span id="pos-table-heading" class="badge badge-info">No Table Selected</span>
             </div>
 
@@ -3057,12 +3063,20 @@ async function submitCreateTable() {
 }
 
 async function handleLogout() {
+  const loginPath = window.location.pathname.includes('/public/') ? 'login.php' : 'public/login.php';
   try {
-    await SmartAPI.post('api/v1/auth/logout.php', {});
-    SmartNotifications.show('Successfully logged out', 'info');
-    setTimeout(() => { window.location.href = 'public/login.php'; }, 400);
+    if (window.SmartAPI && typeof window.SmartAPI.post === 'function') {
+      await SmartAPI.post('api/v1/auth/logout.php', {});
+    } else {
+      const apiPath = window.location.pathname.includes('/public/') ? '../api/v1/auth/logout.php' : 'api/v1/auth/logout.php';
+      await fetch(apiPath, { method: 'POST' });
+    }
+    if (window.SmartNotifications && typeof window.SmartNotifications.show === 'function') {
+      SmartNotifications.show('Successfully logged out', 'info');
+    }
+    setTimeout(() => { window.location.href = loginPath; }, 300);
   } catch (e) {
-    window.location.href = 'public/login.php';
+    window.location.href = loginPath;
   }
 }
 
@@ -3333,9 +3347,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const targetNavLink = document.querySelector(`.sidebar-nav a[href="#${initialView}"]`);
   switchRoleView(initialView, targetNavLink);
 
-  // Only load admin/manager data if full access
+  // Load operational data for all authenticated roles (Waiters, Staff, Managers, Admins)
+  try { if (typeof loadPOSProducts === 'function') loadPOSProducts(); } catch (e) {}
+  try { if (typeof loadPOSTableSelector === 'function') loadPOSTableSelector(); } catch (e) {}
+  try { if (typeof loadActiveOrders === 'function') loadActiveOrders(); } catch (e) {}
   if (isFullAccess) {
-    try { if (typeof loadActiveOrders === 'function') loadActiveOrders(); } catch (e) {}
     try { if (typeof loadWaiterMatrix === 'function') loadWaiterMatrix(); } catch (e) {}
   }
 });
