@@ -21,9 +21,10 @@ if (!$db) {
 try {
     // 1. Seed Permissions Catalog
     echo "1. Seeding permissions catalog (" . count(PERMISSIONS_CATALOG) . " permissions)...\n";
-    $stmtPerm = $db->prepare("INSERT INTO permissions (name, description) VALUES (:name, :desc) ON DUPLICATE KEY UPDATE description = VALUES(description)");
+    $stmtPerm = $db->prepare("INSERT INTO permissions (name, module, description) VALUES (:name, :module, :desc) ON DUPLICATE KEY UPDATE module = VALUES(module), description = VALUES(description)");
     foreach (PERMISSIONS_CATALOG as $permName => $permDesc) {
-        $stmtPerm->execute(['name' => $permName, 'desc' => $permDesc]);
+        $module = explode('.', $permName)[0] ?? 'general';
+        $stmtPerm->execute(['name' => $permName, 'module' => $module, 'desc' => $permDesc]);
     }
 
     // 2. Fetch all permission IDs mapped by name
