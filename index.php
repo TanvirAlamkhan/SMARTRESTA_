@@ -16,6 +16,8 @@ CSRF::init();
 $csrfToken = CSRF::getToken();
 $currentUser = Auth::user();
 $userRole = strtolower(trim(Auth::role() ?? 'admin'));
+$isPhpSubdir = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/php/') !== false);
+$assetPrefix = $isPhpSubdir ? '../' : './';
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -31,17 +33,17 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Modular CSS Architecture -->
-  <link rel="stylesheet" href="assets/css/variables.css">
-  <link rel="stylesheet" href="assets/css/reset.css">
-  <link rel="stylesheet" href="assets/css/typography.css">
-  <link rel="stylesheet" href="assets/css/layout.css">
-  <link rel="stylesheet" href="assets/css/components.css">
-  <link rel="stylesheet" href="assets/css/tables.css">
-  <link rel="stylesheet" href="assets/css/forms.css">
-  <link rel="stylesheet" href="assets/css/pos.css">
-  <link rel="stylesheet" href="assets/css/kitchen.css">
-  <link rel="stylesheet" href="assets/css/responsive.css">
-  <link rel="stylesheet" href="assets/css/dark-mode.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/variables.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/reset.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/typography.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/layout.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/components.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/tables.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/forms.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/pos.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/kitchen.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/responsive.css">
+  <link rel="stylesheet" href="<?= $assetPrefix ?>assets/css/dark-mode.css">
 
   <style>
     .floor-grid {
@@ -2506,21 +2508,21 @@ async function deleteProductAction(id, name) {
 </script>
 
 <!-- Core Infrastructure JS -->
-<script src="assets/js/notifications.js"></script>
-<script src="assets/js/ajax.js"></script>
-<script src="assets/js/modal.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/notifications.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/ajax.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/modal.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/app.js"></script>
 
 <!-- Module Operational JS Controllers -->
-<script src="assets/js/pos.js"></script>
-<script src="assets/js/kds.js"></script>
-<script src="assets/js/routing.js"></script>
-<script src="assets/js/billing.js"></script>
-<script src="assets/js/commissions.js"></script>
-<script src="assets/js/inventory.js"></script>
-<script src="assets/js/reports.js"></script>
-<script src="assets/js/finance.js"></script>
-<script src="assets/js/crm.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/pos.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/kds.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/routing.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/billing.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/commissions.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/inventory.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/reports.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/finance.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/crm.js"></script>
 
 </body>
 </html>

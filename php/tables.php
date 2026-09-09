@@ -1,3 +1,3 @@
 <?php
-header('Location: ../index.php#tables');
-exit;
+$initialSection = 'tables';
+require_once __DIR__ . '/../index.php';

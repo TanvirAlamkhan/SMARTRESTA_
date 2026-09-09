@@ -1,3 +1,3 @@
 <?php
-header('Location: ../index.php#crm');
-exit;
+$initialSection = 'crm';
+require_once __DIR__ . '/../index.php';

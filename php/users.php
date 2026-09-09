@@ -1,3 +1,3 @@
 <?php
-header('Location: ../index.php#users');
-exit;
+$initialSection = 'users';
+require_once __DIR__ . '/../index.php';

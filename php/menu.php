@@ -1,3 +1,3 @@
 <?php
-header('Location: ../index.php#menu');
-exit;
+$initialSection = 'menu';
+require_once __DIR__ . '/../index.php';

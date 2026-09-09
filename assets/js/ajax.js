@@ -42,7 +42,8 @@ const SmartAPI = {
 
   async request(endpoint, options = {}) {
     let targetUrl = endpoint;
-    if (window.location.pathname.includes('/public/') && !targetUrl.startsWith('/') && !targetUrl.startsWith('http') && !targetUrl.startsWith('../')) {
+    const isSubdir = window.location.pathname.includes('/public/') || window.location.pathname.includes('/php/');
+    if (isSubdir && !targetUrl.startsWith('/') && !targetUrl.startsWith('http') && !targetUrl.startsWith('../')) {
       targetUrl = '../' + targetUrl;
     }
 

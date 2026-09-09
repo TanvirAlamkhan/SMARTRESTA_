@@ -1,3 +1,3 @@
 <?php
-header('Location: ../index.php#finance');
-exit;
+$initialSection = 'finance';
+require_once __DIR__ . '/../index.php';
