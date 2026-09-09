@@ -132,6 +132,10 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
         <span class="nav-icon">🍳</span>
         <span>Kitchen Display (KDS)</span>
       </a>
+      <a href="#kitchen" class="nav-item" onclick="switchRoleView('kitchen', this, event)">
+        <span class="nav-icon">👨‍🍳</span>
+        <span>Kitchen Dashboard & Production</span>
+      </a>
       <a href="#routing" class="nav-item" onclick="switchRoleView('routing', this, event)">
         <span class="nav-icon">🔀</span>
         <span>Station Routing Engine</span>
@@ -222,6 +226,7 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
       require_once __DIR__ . '/views/menu.php';
       require_once __DIR__ . '/views/pos.php';
       require_once __DIR__ . '/views/kds.php';
+      require_once __DIR__ . '/views/kitchen.php';
       require_once __DIR__ . '/views/users.php';
       require_once __DIR__ . '/views/routing.php';
       require_once __DIR__ . '/views/payments.php';
@@ -1559,6 +1564,7 @@ function switchRoleView(viewId, navEl, event) {
     'menu': 'Restaurant Menu, Categories & Product Catalog',
     'pos': 'POS & Waiter Ordering',
     'kds': 'Kitchen Display System (KDS)',
+    'kitchen': 'Kitchen Display System (KDS) & Station Production',
     'users': 'Users & Staff Role Permissions',
     'routing': 'Smart Order Routing & Station Dispatch',
     'payments': 'Billing Engine & Settlement History',
@@ -1597,6 +1603,8 @@ function switchRoleView(viewId, navEl, event) {
     if (typeof SmartCommissions !== 'undefined' && typeof SmartCommissions.loadPayoutHistory === 'function') SmartCommissions.loadPayoutHistory();
   } else if (cleanId === 'kds') {
     if (typeof SmartKDS !== 'undefined' && typeof SmartKDS.loadKDSGrid === 'function') SmartKDS.loadKDSGrid();
+  } else if (cleanId === 'kitchen') {
+    if (typeof SmartKitchen !== 'undefined' && typeof SmartKitchen.refreshAll === 'function') SmartKitchen.refreshAll();
   } else if (cleanId === 'inventory') {
     if (typeof SmartInventory !== 'undefined' && typeof SmartInventory.init === 'function') SmartInventory.init();
   } else if (cleanId === 'reports') {
@@ -2278,7 +2286,7 @@ window.CURRENT_USER_ROLE = "<?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8')
 window.INITIAL_ACTIVE_SECTION = "<?= htmlspecialchars($initialSection ?? '', ENT_QUOTES, 'UTF-8') ?>";
 
 document.addEventListener('DOMContentLoaded', () => {
-  const ALL_VIEWS = ['admin', 'waiter', 'reception', 'tables', 'menu', 'pos', 'kds', 'routing', 'payments', 'commission-rules', 'commissions-review', 'payouts', 'users', 'inventory', 'reports', 'finance', 'crm'];
+  const ALL_VIEWS = ['admin', 'waiter', 'reception', 'kitchen', 'tables', 'menu', 'pos', 'kds', 'routing', 'payments', 'commission-rules', 'commissions-review', 'payouts', 'users', 'inventory', 'reports', 'finance', 'crm'];
 
   function resolveRoleAccess(roleStr) {
     const r = (roleStr || '').toLowerCase().trim();
@@ -2287,7 +2295,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return { views: ALL_VIEWS, isFullAccess: true };
     }
     if (r.includes('kitchen') || r.includes('chef') || r.includes('cook')) {
-      return { views: ['kds', 'routing', 'inventory'], isFullAccess: false };
+      return { views: ['kitchen', 'kds', 'routing', 'inventory'], isFullAccess: false };
     }
     if (r.includes('reception') || r.includes('cashier') || r.includes('front')) {
       return { views: ['reception', 'tables', 'pos', 'kds', 'payments', 'reports', 'finance', 'crm', 'admin'], isFullAccess: false };
@@ -2549,6 +2557,7 @@ async function deleteProductAction(id, name) {
 <script src="<?= $assetPrefix ?>assets/js/crm.js"></script>
 <script src="<?= $assetPrefix ?>assets/js/reception.js"></script>
 <script src="<?= $assetPrefix ?>assets/js/waiter.js"></script>
+<script src="<?= $assetPrefix ?>assets/js/kitchen.js"></script>
 
 </body>
 </html>
