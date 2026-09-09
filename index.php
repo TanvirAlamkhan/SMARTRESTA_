@@ -1610,6 +1610,11 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
         <label class="form-label">Short Description</label>
         <input type="text" id="new-prod-desc" class="form-control" placeholder="e.g. Creamy fettuccine with grilled chicken breast">
       </div>
+      <div class="form-group">
+        <label class="form-label">Product Picture (Upload File or Paste Image URL)</label>
+        <input type="file" id="new-prod-image-file" class="form-control" accept="image/*" style="margin-bottom: 0.5rem;">
+        <input type="text" id="new-prod-image-url" class="form-control" placeholder="Or paste image URL (e.g. https://.../burger.jpg)">
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="SmartModal.close('create-product-modal')">Cancel</button>
@@ -2597,9 +2602,19 @@ async function loadProductCatalog() {
   try {
     const res = await SmartAPI.get(query);
     if (res.data && res.data.length > 0) {
-      tbody.innerHTML = res.data.map(p => `
+      tbody.innerHTML = res.data.map(p => {
+        const thumb = p.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&auto=format&fit=crop&q=80';
+        return `
         <tr>
-          <td><strong>${p.name}</strong>${p.short_description ? `<br><small style="color:var(--text-muted);">${p.short_description}</small>` : ''}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <img src="${thumb}" alt="${p.name}" style="width:40px; height:40px; border-radius:8px; object-fit:cover; border: 1px solid var(--border-color);" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&auto=format&fit=crop&q=80'">
+              <div>
+                <strong>${p.name}</strong>
+                ${p.short_description ? `<br><small style="color:var(--text-muted);">${p.short_description}</small>` : ''}
+              </div>
+            </div>
+          </td>
           <td><span class="badge badge-info">${p.category_name}</span></td>
           <td><span class="font-mono">${p.sku || 'N/A'}</span></td>
           <td class="price-tag">৳${parseFloat(p.price).toFixed(2)}</td>
@@ -2615,7 +2630,7 @@ async function loadProductCatalog() {
             <button class="btn btn-secondary btn-sm" onclick="openModifiersModal(${p.id}, '${p.name}')">Modifiers (${p.modifier_count || 0})</button>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
     } else {
       tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--text-muted);">No products found matching filters.</td></tr>`;
     }
@@ -2632,16 +2647,46 @@ async function submitCreateProduct() {
   const default_station_id = document.getElementById('new-prod-station').value;
   const short_description = document.getElementById('new-prod-desc').value.trim();
 
+  const imageFileInput = document.getElementById('new-prod-image-file');
+  const imageUrlInput = document.getElementById('new-prod-image-url');
+  let image_url = imageUrlInput ? imageUrlInput.value.trim() : null;
+
   if (!name || !category_id || price === '') {
     SmartNotifications.show('Please fill in product name, category, and base price', 'warning');
     return;
   }
 
   try {
-    const res = await SmartAPI.post('api/v1/products/index.php', { name, category_id, sku, price, default_station_id, short_description });
+    // 1. Handle direct file upload if selected
+    if (imageFileInput && imageFileInput.files && imageFileInput.files.length > 0) {
+      const formData = new FormData();
+      formData.append('image', imageFileInput.files[0]);
+
+      const uploadRes = await fetch('api/v1/products/upload.php', {
+        method: 'POST',
+        body: formData
+      });
+      const uploadData = await uploadRes.json();
+      if (uploadData.success && uploadData.data && uploadData.data.image_url) {
+        image_url = uploadData.data.image_url;
+      }
+    }
+
+    // 2. Submit Product Creation
+    const res = await SmartAPI.post('api/v1/products/index.php', { 
+      name, category_id, sku, price, default_station_id, short_description, image_url 
+    });
+
     if (res.success) {
       SmartNotifications.show('Product created successfully!', 'success');
       SmartModal.close('create-product-modal');
+      // Reset inputs
+      document.getElementById('new-prod-name').value = '';
+      document.getElementById('new-prod-sku').value = '';
+      document.getElementById('new-prod-price').value = '';
+      document.getElementById('new-prod-desc').value = '';
+      if (imageFileInput) imageFileInput.value = '';
+      if (imageUrlInput) imageUrlInput.value = '';
       loadProductCatalog();
     }
   } catch (err) {

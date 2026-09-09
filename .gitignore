@@ -21,3 +21,5 @@ storage/tmp/*
 .idea/
 .vscode/
 *.swp
+scratch/
+

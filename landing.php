@@ -559,6 +559,16 @@ $currentUser = Auth::user();
         <a href="index.php#crm-view" class="portal-link">Open CRM & Loyalty Hub &rarr;</a>
       </div>
 
+      <!-- 9. Customer Call (Cus Call) Direct Table Ordering -->
+      <div class="portal-card" style="border: 1px solid rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.05);">
+        <div>
+          <div class="portal-icon">🔔</div>
+          <div class="portal-title">Customer Call (Cus Call)</div>
+          <div class="portal-desc">Login-free direct table ordering portal for guests. Select food items, customize cooking instructions, and route orders directly to the kitchen display.</div>
+        </div>
+        <a href="public/cus_call.php" class="portal-link" style="color: #f59e0b; font-weight: 700;">Open Customer Call Portal &rarr;</a>
+      </div>
+
     </div>
   </section>
 

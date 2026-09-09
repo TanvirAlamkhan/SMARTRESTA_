@@ -192,6 +192,8 @@ class MenuEngine {
         $shortDescription = !empty($data['short_description']) ? trim($data['short_description']) : null;
         $costPrice = (float)($data['cost_price'] ?? 0.00);
 
+        $imageUrl = !empty($data['image_url']) ? trim($data['image_url']) : null;
+
         if (empty($name)) {
             throw new Exception("Product name is required.");
         }
@@ -216,8 +218,8 @@ class MenuEngine {
         $db->beginTransaction();
         try {
             $stmt = $db->prepare("
-                INSERT INTO products (category_id, default_station_id, name, slug, sku, short_description, description, price, cost_price, status, is_available, display_order)
-                VALUES (:category_id, :default_station_id, :name, :slug, :sku, :short_description, :description, :price, :cost_price, 'ACTIVE', 1, 0)
+                INSERT INTO products (category_id, default_station_id, name, slug, sku, short_description, description, price, cost_price, image_url, status, is_available, display_order)
+                VALUES (:category_id, :default_station_id, :name, :slug, :sku, :short_description, :description, :price, :cost_price, :image_url, 'ACTIVE', 1, 0)
             ");
             $stmt->execute([
                 'category_id' => $categoryId,
@@ -228,21 +230,30 @@ class MenuEngine {
                 'short_description' => $shortDescription,
                 'description' => $description,
                 'price' => $price,
-                'cost_price' => $costPrice
+                'cost_price' => $costPrice,
+                'image_url' => $imageUrl
             ]);
             $productId = (int)$db->lastInsertId();
 
             AuditLogger::log($userId, 'PRODUCT_CREATED', 'product', $productId, null, [
-                'name' => $name, 'price' => $price, 'sku' => $sku
+                'name' => $name, 'price' => $price, 'sku' => $sku, 'image_url' => $imageUrl
             ]);
 
             $db->commit();
-            return ['id' => $productId, 'name' => $name, 'price' => $price];
+            return ['id' => $productId, 'name' => $name, 'price' => $price, 'image_url' => $imageUrl];
 
         } catch (Exception $e) {
             $db->rollBack();
             throw $e;
         }
+    }
+
+    public static function updateProductImage(int $productId, string $imageUrl, int $userId = 1): bool {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("UPDATE products SET image_url = :image_url WHERE id = :id AND deleted_at IS NULL");
+        $stmt->execute(['image_url' => trim($imageUrl), 'id' => $productId]);
+        AuditLogger::log($userId, 'PRODUCT_IMAGE_UPDATED', 'product', $productId, null, ['image_url' => $imageUrl]);
+        return true;
     }
 
     public static function toggleAvailability(int $productId, bool $isAvailable, int $userId = 1): bool {
