@@ -2409,7 +2409,12 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for `users`
-INSERT INTO `users` (`id`, `role_id`, `name`, `email`, `phone`, `password_hash`, `role`, `status`, `last_login`, `created_at`, `updated_at`, `deleted_at`) VALUES ('1', '1', 'System Administrator', 'admin@smartresta.com', NULL, '$2y$10$abcdefghijklmnopqrstuu', 'admin', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL);
+INSERT INTO `users` (`id`, `role_id`, `name`, `email`, `phone`, `password_hash`, `role`, `status`, `last_login`, `created_at`, `updated_at`, `deleted_at`) VALUES
+('1', '1', 'System Administrator', 'admin@smartresta.com', NULL, '$2y$12$LSKTpAxq6SX/xNz5H9Fm8.GL/LyutLCO01z6EstsT3E5/zPJl3yzO', 'admin', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
+('2', '2', 'Branch Manager', 'manager@smartresta.com', NULL, '$2y$12$LSKTpAxq6SX/xNz5H9Fm8.GL/LyutLCO01z6EstsT3E5/zPJl3yzO', 'manager', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
+('3', '3', 'Receptionist / Cashier', 'reception@smartresta.com', NULL, '$2y$12$LSKTpAxq6SX/xNz5H9Fm8.GL/LyutLCO01z6EstsT3E5/zPJl3yzO', 'reception', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
+('4', '4', 'Head Waiter', 'waiter@smartresta.com', NULL, '$2y$12$LSKTpAxq6SX/xNz5H9Fm8.GL/LyutLCO01z6EstsT3E5/zPJl3yzO', 'waiter', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL),
+('5', '5', 'Head Chef', 'kitchen@smartresta.com', NULL, '$2y$12$LSKTpAxq6SX/xNz5H9Fm8.GL/LyutLCO01z6EstsT3E5/zPJl3yzO', 'kitchen', 'ACTIVE', NULL, '2026-09-09 05:40:44', '2026-09-09 05:40:44', NULL);
 
 -- Table structure for `waiter_assignments`
 DROP TABLE IF EXISTS `waiter_assignments`;
