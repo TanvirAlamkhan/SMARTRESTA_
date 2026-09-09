@@ -59,12 +59,12 @@ if (!$user) {
 RateLimiter::clear($email);
 
 $roleName = strtolower(trim($user['role_name'] ?: $user['role']));
-$redirectTarget = '../admin.php';
+$redirectTarget = '../php/admin.php';
 
 if (strpos($roleName, 'waiter') !== false || strpos($roleName, 'reception') !== false || strpos($roleName, 'cashier') !== false) {
-    $redirectTarget = '../pos.php';
+    $redirectTarget = '../php/pos.php';
 } elseif (strpos($roleName, 'kitchen') !== false || strpos($roleName, 'chef') !== false || strpos($roleName, 'cook') !== false) {
-    $redirectTarget = '../kds.php';
+    $redirectTarget = '../php/kds.php';
 }
 
 Response::json(true, 200, "Authentication successful", [

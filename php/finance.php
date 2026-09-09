@@ -6,4 +6,4 @@ $initialActiveSection = 'finance';
 ?>
 <script>window.INITIAL_ACTIVE_SECTION = 'finance';</script>
 <?php
-require_once __DIR__ . '/index.php';
+require_once __DIR__ . '/../index.php';

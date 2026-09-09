@@ -6,4 +6,4 @@ $initialActiveSection = 'tables';
 ?>
 <script>window.INITIAL_ACTIVE_SECTION = 'tables';</script>
 <?php
-require_once __DIR__ . '/index.php';
+require_once __DIR__ . '/../index.php';

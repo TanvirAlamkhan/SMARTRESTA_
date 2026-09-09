@@ -6,4 +6,4 @@ $initialActiveSection = 'crm';
 ?>
 <script>window.INITIAL_ACTIVE_SECTION = 'crm';</script>
 <?php
-require_once __DIR__ . '/index.php';
+require_once __DIR__ . '/../index.php';
