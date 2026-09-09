@@ -42,7 +42,7 @@ const SmartAPI = {
 
   async request(endpoint, options = {}) {
     let targetUrl = endpoint;
-    if ((window.location.pathname.includes('/public/') || window.location.pathname.includes('/php/')) && !targetUrl.startsWith('/') && !targetUrl.startsWith('http') && !targetUrl.startsWith('../')) {
+    if (window.location.pathname.includes('/public/') && !targetUrl.startsWith('/') && !targetUrl.startsWith('http') && !targetUrl.startsWith('../')) {
       targetUrl = '../' + targetUrl;
     }
 
@@ -70,7 +70,7 @@ const SmartAPI = {
             SmartNotifications.show('Authentication required. Redirecting to login...', 'warning');
           }
           setTimeout(() => {
-            const loginPath = window.location.pathname.includes('/public/') ? 'login.php' : (window.location.pathname.includes('/php/') ? '../public/login.php' : 'public/login.php');
+            const loginPath = window.location.pathname.includes('/public/') ? 'login.php' : 'public/login.php';
             window.location.href = loginPath;
           }, 800);
         }

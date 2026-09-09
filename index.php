@@ -21,7 +21,6 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <base href="<?= (basename(dirname($_SERVER['SCRIPT_NAME'] ?? '')) === 'php') ? '../' : './' ?>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
   <title>SMARTRESTA — Restaurant Operations & Floor Management</title>
@@ -96,23 +95,23 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
 
     <nav class="sidebar-nav">
       <div class="nav-section-title">OPERATIONS</div>
-      <a href="php/admin.php" class="nav-item active" onclick="switchRoleView('admin', this, event)">
+      <a href="#admin" class="nav-item active" onclick="switchRoleView('admin', this, event)">
         <span class="nav-icon">📊</span>
         <span>Manager Dashboard</span>
       </a>
-      <a href="php/tables.php" class="nav-item" onclick="switchRoleView('tables', this, event)">
+      <a href="#tables" class="nav-item" onclick="switchRoleView('tables', this, event)">
         <span class="nav-icon">🪑</span>
         <span>Floors & Dining Tables</span>
       </a>
-      <a href="php/menu.php" class="nav-item" onclick="switchRoleView('menu', this, event)">
+      <a href="#menu" class="nav-item" onclick="switchRoleView('menu', this, event)">
         <span class="nav-icon">🍔</span>
         <span>Menu & Product Catalog</span>
       </a>
-      <a href="php/pos.php" class="nav-item" onclick="switchRoleView('pos', this, event)">
+      <a href="#pos" class="nav-item" onclick="switchRoleView('pos', this, event)">
         <span class="nav-icon">💳</span>
         <span>POS & Waiter Ordering</span>
       </a>
-      <a href="php/kds.php" class="nav-item" onclick="switchRoleView('kds', this, event)">
+      <a href="#kds" class="nav-item" onclick="switchRoleView('kds', this, event)">
         <span class="nav-icon">🍳</span>
         <span>Kitchen Display (KDS)</span>
       </a>
@@ -120,7 +119,7 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
         <span class="nav-icon">🔀</span>
         <span>Station Routing Engine</span>
       </a>
-      <a href="php/payments.php" class="nav-item" onclick="switchRoleView('payments', this, event)">
+      <a href="#payments" class="nav-item" onclick="switchRoleView('payments', this, event)">
         <span class="nav-icon">💰</span>
         <span>Billing & Payments History</span>
       </a>
@@ -138,23 +137,23 @@ $userRole = strtolower(trim(Auth::role() ?? 'admin'));
       </a>
 
       <div class="nav-section-title" style="margin-top:16px;">ADMIN & ACCESS</div>
-      <a href="php/users.php" class="nav-item" onclick="switchRoleView('users', this, event)">
+      <a href="#users" class="nav-item" onclick="switchRoleView('users', this, event)">
         <span class="nav-icon">👥</span>
         <span>Users & Staff Roles</span>
       </a>
-      <a href="php/inventory.php" class="nav-item" onclick="switchRoleView('inventory', this, event)">
+      <a href="#inventory" class="nav-item" onclick="switchRoleView('inventory', this, event)">
         <span class="nav-icon">📦</span>
         <span>Stock & Ingredients</span>
       </a>
-      <a href="php/reports.php" class="nav-item" onclick="switchRoleView('reports', this, event)">
+      <a href="#reports" class="nav-item" onclick="switchRoleView('reports', this, event)">
         <span class="nav-icon">📈</span>
         <span>Reports & Analytics</span>
       </a>
-      <a href="php/finance.php" class="nav-item" onclick="switchRoleView('finance', this, event)">
+      <a href="#finance" class="nav-item" onclick="switchRoleView('finance', this, event)">
         <span class="nav-icon">💵</span>
         <span>Finance, Shifts & Day Close</span>
       </a>
-      <a href="php/crm.php" class="nav-item" onclick="switchRoleView('crm', this, event)">
+      <a href="#crm" class="nav-item" onclick="switchRoleView('crm', this, event)">
         <span class="nav-icon">🤝</span>
         <span>CRM & QR Ordering</span>
       </a>
@@ -1530,9 +1529,7 @@ function switchRoleView(viewId, navEl, event) {
   }
 
   try {
-    const isSubdir = window.location.pathname.includes('/php/');
-    const targetUrl = isSubdir ? `${cleanId}.php` : `php/${cleanId}.php`;
-    window.history.pushState({ section: cleanId }, '', targetUrl);
+    window.location.hash = '#' + cleanId;
   } catch (e) {}
 
   const titles = {
