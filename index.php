@@ -1,7 +1,7 @@
 <?php
 /**
  * SMARTRESTA - Main Platform Shell & Production System Architecture
- * Prompt 04 Compliance: Restaurant Structure, Floors, Tables, Operations & Dining Sessions Engine
+ * Prompt 13 Architecture Repair: Real Role-Based Server-Side Portals
  * Tech Stack: HTML5, CSS3, Vanilla ES6+ JS, PHP 8.x, MySQL 8.x PDO
  */
 
@@ -9,12 +9,118 @@ require_once __DIR__ . '/config/env.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/core/Auth.php';
 require_once __DIR__ . '/core/CSRF.php';
+require_once __DIR__ . '/core/Router.php';
 
 Auth::requireAuth();
 
 CSRF::init();
 $csrfToken = CSRF::getToken();
 $currentUser = Auth::user();
+$userRole = Auth::role();
+$userRoleKey = Router::normalizeRole($userRole);
+
+// Direct access to /index.php redirects to user's assigned portal
+if (!isset($currentPortal)) {
+    Router::redirectToPortal();
+}
+
+$activePortal = Router::normalizeRole($currentPortal ?? $userRoleKey);
+
+// Define Portal Configurations, Navigation Items, and Allowed Views
+$portalConfig = [
+    'admin' => [
+        'name' => 'Admin Portal',
+        'badge' => 'ADMIN',
+        'default_section' => 'admin',
+        'nav' => [
+            ['id' => 'admin', 'icon' => '📊', 'label' => 'Admin Overview'],
+            ['id' => 'users', 'icon' => '👥', 'label' => 'Users & Staff Roles'],
+            ['id' => 'tables', 'icon' => '🪑', 'label' => 'Floors & Tables'],
+            ['id' => 'menu', 'icon' => '🍔', 'label' => 'Menu & Catalog'],
+            ['id' => 'waiter', 'icon' => '🍷', 'label' => 'Waiter Workspace'],
+            ['id' => 'pos', 'icon' => '💳', 'label' => 'POS & Ordering'],
+            ['id' => 'kds', 'icon' => '🍳', 'label' => 'Kitchen Display (KDS)'],
+            ['id' => 'kitchen', 'icon' => '👨‍🍳', 'label' => 'Kitchen Production'],
+            ['id' => 'routing', 'icon' => '🔀', 'label' => 'Station Routing'],
+            ['id' => 'payments', 'icon' => '💰', 'label' => 'Payments & Billing'],
+            ['id' => 'commission-rules', 'icon' => '📜', 'label' => 'Commission Rules'],
+            ['id' => 'commissions-review', 'icon' => '📑', 'label' => 'Commissions Review'],
+            ['id' => 'payouts', 'icon' => '💵', 'label' => 'Payout Settlements'],
+            ['id' => 'inventory', 'icon' => '📦', 'label' => 'Stock & Inventory'],
+            ['id' => 'reports', 'icon' => '📈', 'label' => 'Reports & Analytics'],
+            ['id' => 'finance', 'icon' => '💵', 'label' => 'Finance & Day Close'],
+            ['id' => 'crm', 'icon' => '🤝', 'label' => 'CRM & Reservations'],
+        ],
+        'views' => ['admin', 'users', 'tables', 'menu', 'waiter', 'pos', 'kds', 'kitchen', 'routing', 'payments', 'commission_rules', 'commissions_review', 'payouts', 'inventory', 'reports', 'finance', 'crm']
+    ],
+    'manager' => [
+        'name' => 'Manager Portal',
+        'badge' => 'MANAGER',
+        'default_section' => 'admin',
+        'nav' => [
+            ['id' => 'admin', 'icon' => '📊', 'label' => 'Manager Dashboard'],
+            ['id' => 'waiter', 'icon' => '🍷', 'label' => 'Waiter Performance'],
+            ['id' => 'reception', 'icon' => '🛎️', 'label' => 'Reception Front Desk'],
+            ['id' => 'tables', 'icon' => '🪑', 'label' => 'Floors & Tables'],
+            ['id' => 'menu', 'icon' => '🍔', 'label' => 'Menu Performance'],
+            ['id' => 'kds', 'icon' => '🍳', 'label' => 'Kitchen Monitor'],
+            ['id' => 'kitchen', 'icon' => '👨‍🍳', 'label' => 'Kitchen Production'],
+            ['id' => 'payments', 'icon' => '💰', 'label' => 'Payments History'],
+            ['id' => 'commissions-review', 'icon' => '📑', 'label' => 'Commission Approvals'],
+            ['id' => 'inventory', 'icon' => '📦', 'label' => 'Inventory & Stock'],
+            ['id' => 'reports', 'icon' => '📈', 'label' => 'Reports & Analytics'],
+            ['id' => 'finance', 'icon' => '💵', 'label' => 'Finance & Shifts'],
+            ['id' => 'crm', 'icon' => '🤝', 'label' => 'Customers & CRM'],
+        ],
+        'views' => ['admin', 'waiter', 'reception', 'tables', 'menu', 'kds', 'kitchen', 'payments', 'commissions_review', 'inventory', 'reports', 'finance', 'crm']
+    ],
+    'reception' => [
+        'name' => 'Reception Portal',
+        'badge' => 'RECEPTION',
+        'default_section' => 'reception',
+        'nav' => [
+            ['id' => 'reception', 'icon' => '🛎️', 'label' => 'Reception Front Desk'],
+            ['id' => 'pos', 'icon' => '💳', 'label' => 'POS Billing & Checkout'],
+            ['id' => 'tables', 'icon' => '🪑', 'label' => 'Tables & Sessions'],
+            ['id' => 'payments', 'icon' => '💰', 'label' => 'Billing & Payment History'],
+            ['id' => 'crm', 'icon' => '🤝', 'label' => 'Customers & Reservations'],
+        ],
+        'views' => ['reception', 'pos', 'tables', 'payments', 'crm']
+    ],
+    'waiter' => [
+        'name' => 'Waiter Portal',
+        'badge' => 'WAITER',
+        'default_section' => 'waiter',
+        'nav' => [
+            ['id' => 'waiter', 'icon' => '🍷', 'label' => 'Waiter Workspace'],
+            ['id' => 'pos', 'icon' => '💳', 'label' => 'POS & Table Ordering'],
+            ['id' => 'tables', 'icon' => '🪑', 'label' => 'Floors & Tables'],
+            ['id' => 'kds', 'icon' => '🍳', 'label' => 'Kitchen Feed'],
+        ],
+        'views' => ['waiter', 'pos', 'tables', 'kds']
+    ],
+    'kitchen' => [
+        'name' => 'Kitchen Portal',
+        'badge' => 'KITCHEN',
+        'default_section' => 'kitchen',
+        'nav' => [
+            ['id' => 'kitchen', 'icon' => '👨‍🍳', 'label' => 'Kitchen Production'],
+            ['id' => 'kds', 'icon' => '🍳', 'label' => 'Kitchen Display (KDS)'],
+            ['id' => 'routing', 'icon' => '🔀', 'label' => 'Station Routing'],
+            ['id' => 'inventory', 'icon' => '📦', 'label' => 'Stock & Ingredients'],
+        ],
+        'views' => ['kitchen', 'kds', 'routing', 'inventory']
+    ]
+];
+
+$activeConfig = $portalConfig[$activePortal] ?? $portalConfig['admin'];
+$requestedSection = $_GET['section'] ?? $_GET['view'] ?? null;
+if ($requestedSection && in_array(str_replace('-', '_', $requestedSection), $activeConfig['views'], true)) {
+    $initialSection = $requestedSection;
+} else {
+    $initialSection = $initialSection ?? $activeConfig['default_section'];
+}
+
 $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
 $isPhpSubdir = (
     strpos($scriptPath, '/php/') !== false ||
@@ -32,7 +138,7 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-  <title>SMARTRESTA — Restaurant Operations & Floor Management</title>
+  <title><?= htmlspecialchars($activeConfig['name']) ?> — SMARTRESTA</title>
 
   <!-- Google Fonts: Poppins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -98,86 +204,21 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
     <div class="sidebar-header">
       <div class="brand-logo">
         <span>SMARTRESTA</span>
-        <span class="logo-badge">OS</span>
+        <span class="logo-badge"><?= htmlspecialchars($activeConfig['badge']) ?></span>
       </div>
     </div>
 
     <nav class="sidebar-nav">
-      <div class="nav-section-title">OPERATIONS</div>
-      <a href="#admin" class="nav-item active" onclick="switchRoleView('admin', this, event)">
-        <span class="nav-icon">📊</span>
-        <span>Manager Dashboard</span>
-      </a>
-      <a href="#reception" class="nav-item" onclick="switchRoleView('reception', this, event)">
-        <span class="nav-icon">🛎️</span>
-        <span>Reception Front Desk</span>
-      </a>
-      <a href="#waiter" class="nav-item" onclick="switchRoleView('waiter', this, event)">
-        <span class="nav-icon">🍷</span>
-        <span>Waiter Workspace</span>
-      </a>
-      <a href="#tables" class="nav-item" onclick="switchRoleView('tables', this, event)">
-        <span class="nav-icon">🪑</span>
-        <span>Floors & Dining Tables</span>
-      </a>
-      <a href="#menu" class="nav-item" onclick="switchRoleView('menu', this, event)">
-        <span class="nav-icon">🍔</span>
-        <span>Menu & Product Catalog</span>
-      </a>
-      <a href="#pos" class="nav-item" onclick="switchRoleView('pos', this, event)">
-        <span class="nav-icon">💳</span>
-        <span>POS & Waiter Ordering</span>
-      </a>
-      <a href="#kds" class="nav-item" onclick="switchRoleView('kds', this, event)">
-        <span class="nav-icon">🍳</span>
-        <span>Kitchen Display (KDS)</span>
-      </a>
-      <a href="#kitchen" class="nav-item" onclick="switchRoleView('kitchen', this, event)">
-        <span class="nav-icon">👨‍🍳</span>
-        <span>Kitchen Dashboard & Production</span>
-      </a>
-      <a href="#routing" class="nav-item" onclick="switchRoleView('routing', this, event)">
-        <span class="nav-icon">🔀</span>
-        <span>Station Routing Engine</span>
-      </a>
-      <a href="#payments" class="nav-item" onclick="switchRoleView('payments', this, event)">
-        <span class="nav-icon">💰</span>
-        <span>Billing & Payments History</span>
-      </a>
-      <a href="#commission-rules" class="nav-item" onclick="switchRoleView('commission-rules', this, event)">
-        <span class="nav-icon">📜</span>
-        <span>Commission Rules Engine</span>
-      </a>
-      <a href="#commissions-review" class="nav-item" onclick="switchRoleView('commissions-review', this, event)">
-        <span class="nav-icon">📑</span>
-        <span>Commission Review & Approvals</span>
-      </a>
-      <a href="#payouts" class="nav-item" onclick="switchRoleView('payouts', this, event)">
-        <span class="nav-icon">💵</span>
-        <span>Commission Payout Settlements</span>
-      </a>
+      <div class="nav-section-title"><?= htmlspecialchars(strtoupper($activeConfig['name'])) ?></div>
+      <?php foreach ($activeConfig['nav'] as $item): ?>
+        <a href="#<?= htmlspecialchars($item['id']) ?>" 
+           class="nav-item <?= ($initialSection === $item['id']) ? 'active' : '' ?>" 
+           onclick="switchRoleView('<?= htmlspecialchars($item['id']) ?>', this, event)">
+          <span class="nav-icon"><?= $item['icon'] ?></span>
+          <span><?= htmlspecialchars($item['label']) ?></span>
+        </a>
+      <?php endforeach; ?>
 
-      <div class="nav-section-title" style="margin-top:16px;">ADMIN & ACCESS</div>
-      <a href="#users" class="nav-item" onclick="switchRoleView('users', this, event)">
-        <span class="nav-icon">👥</span>
-        <span>Users & Staff Roles</span>
-      </a>
-      <a href="#inventory" class="nav-item" onclick="switchRoleView('inventory', this, event)">
-        <span class="nav-icon">📦</span>
-        <span>Stock & Ingredients</span>
-      </a>
-      <a href="#reports" class="nav-item" onclick="switchRoleView('reports', this, event)">
-        <span class="nav-icon">📈</span>
-        <span>Reports & Analytics</span>
-      </a>
-      <a href="#finance" class="nav-item" onclick="switchRoleView('finance', this, event)">
-        <span class="nav-icon">💵</span>
-        <span>Finance, Shifts & Day Close</span>
-      </a>
-      <a href="#crm" class="nav-item" onclick="switchRoleView('crm', this, event)">
-        <span class="nav-icon">🤝</span>
-        <span>CRM & QR Ordering</span>
-      </a>
       <div class="nav-section-title" style="margin-top:16px;">ACCOUNT</div>
       <a href="javascript:void(0)" class="nav-item" onclick="handleLogout()" style="color: var(--danger-color, #ef4444);">
         <span class="nav-icon">🔒</span>
@@ -194,8 +235,8 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
       <div class="topbar-left">
         <button id="mobile-menu-btn" class="btn btn-secondary btn-icon" style="display:none;">☰</button>
         <div>
-          <h1 id="view-title">Manager Overview</h1>
-          <span class="text-sm">User: <strong><?= htmlspecialchars($currentUser['name'] ?? 'Staff') ?></strong> (<span class="badge badge-info"><?= htmlspecialchars(strtoupper($userRole)) ?></span>) | Branch: Main Outlet</span>
+          <h1 id="view-title"><?= htmlspecialchars($activeConfig['name']) ?></h1>
+          <span class="text-sm">User: <strong><?= htmlspecialchars($currentUser['name'] ?? 'Staff') ?></strong> (<span class="badge badge-info"><?= htmlspecialchars(strtoupper($userRole)) ?></span>) | Portal: <strong style="color:var(--accent);"><?= htmlspecialchars(strtoupper($activePortal)) ?></strong> | Branch: Main Outlet</span>
         </div>
       </div>
 
@@ -208,7 +249,7 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
           <span>🔒</span>
           <span>Sign Out</span>
         </button>
-        <button class="btn btn-primary" onclick="SmartModal.open('new-order-modal')">
+        <button class="btn btn-primary" onclick="SmartModal.open('modal-create-reservation')">
           <span>+</span>
           <span>Quick Reservation</span>
         </button>
@@ -219,24 +260,12 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
     <div class="page-container">
 
       <?php
-      require_once __DIR__ . '/views/waiter.php';
-      require_once __DIR__ . '/views/reception.php';
-      require_once __DIR__ . '/views/admin.php';
-      require_once __DIR__ . '/views/tables.php';
-      require_once __DIR__ . '/views/menu.php';
-      require_once __DIR__ . '/views/pos.php';
-      require_once __DIR__ . '/views/kds.php';
-      require_once __DIR__ . '/views/kitchen.php';
-      require_once __DIR__ . '/views/users.php';
-      require_once __DIR__ . '/views/routing.php';
-      require_once __DIR__ . '/views/payments.php';
-      require_once __DIR__ . '/views/commission_rules.php';
-      require_once __DIR__ . '/views/commissions_review.php';
-      require_once __DIR__ . '/views/payouts.php';
-      require_once __DIR__ . '/views/inventory.php';
-      require_once __DIR__ . '/views/reports.php';
-      require_once __DIR__ . '/views/finance.php';
-      require_once __DIR__ . '/views/crm.php';
+      foreach ($activeConfig['views'] as $v) {
+          $viewFile = __DIR__ . '/views/' . $v . '.php';
+          if (file_exists($viewFile)) {
+              require_once $viewFile;
+          }
+      }
       ?>
 
     </div>
@@ -2283,62 +2312,29 @@ async function submitCreateStation() {
 }
 
 window.CURRENT_USER_ROLE = "<?= htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8') ?>";
+window.CURRENT_PORTAL = "<?= htmlspecialchars($activePortal, ENT_QUOTES, 'UTF-8') ?>";
 window.INITIAL_ACTIVE_SECTION = "<?= htmlspecialchars($initialSection ?? '', ENT_QUOTES, 'UTF-8') ?>";
 
 document.addEventListener('DOMContentLoaded', () => {
-  const ALL_VIEWS = ['admin', 'waiter', 'reception', 'kitchen', 'tables', 'menu', 'pos', 'kds', 'routing', 'payments', 'commission-rules', 'commissions-review', 'payouts', 'users', 'inventory', 'reports', 'finance', 'crm'];
-
-  function resolveRoleAccess(roleStr) {
-    const r = (roleStr || '').toLowerCase().trim();
-
-    if (r.includes('admin') || r.includes('manager')) {
-      return { views: ALL_VIEWS, isFullAccess: true };
-    }
-    if (r.includes('kitchen') || r.includes('chef') || r.includes('cook')) {
-      return { views: ['kitchen', 'kds', 'routing', 'inventory'], isFullAccess: false };
-    }
-    if (r.includes('reception') || r.includes('cashier') || r.includes('front')) {
-      return { views: ['reception', 'tables', 'pos', 'kds', 'payments', 'reports', 'finance', 'crm', 'admin'], isFullAccess: false };
-    }
-    if (r.includes('waiter') || r.includes('server') || r.includes('steward')) {
-      return { views: ['waiter', 'pos', 'tables', 'menu', 'kds', 'payments', 'payouts', 'crm', 'admin'], isFullAccess: false };
-    }
-    return { views: ['pos', 'tables'], isFullAccess: false };
-  }
-
-  const userRoleKey = window.CURRENT_USER_ROLE || '';
-  const { views: allowedList, isFullAccess } = resolveRoleAccess(userRoleKey);
-
-  // Filter sidebar navigation links according to role permissions
-  document.querySelectorAll('.sidebar-nav a.nav-item').forEach(link => {
-    const href = link.getAttribute('href');
-    if (href) {
-      const cleanHref = href.replace('#', '').replace('.php', '').replace(/-view$/, '');
-      const isAllowed = allowedList.some(v => v === cleanHref || v + '-view' === cleanHref || v === cleanHref + '-view');
-      link.style.display = isAllowed ? 'flex' : 'none';
-    }
-  });
-
-  // Detect active page module from URL path (e.g. /php/pos.php -> 'pos', /php/kds.php -> 'kds')
-  const pathMatch = window.location.pathname.match(/\/php\/([a-z0-9_-]+)\.php/i);
-  const pathSection = pathMatch ? pathMatch[1] : null;
+  const portalNavIds = <?= json_encode(array_column($activeConfig['nav'], 'id')) ?>;
   const hashClean = window.location.hash ? window.location.hash.replace('#', '').replace(/-view$/, '') : null;
 
-  let initialView = pathSection || hashClean || window.INITIAL_ACTIVE_SECTION || allowedList[0] || 'pos';
-  if (!allowedList.includes(initialView) && !isFullAccess) {
-    initialView = allowedList[0] || 'pos';
+  let initialView = hashClean || window.INITIAL_ACTIVE_SECTION || portalNavIds[0] || 'admin';
+  if (!portalNavIds.includes(initialView)) {
+    initialView = portalNavIds[0] || window.INITIAL_ACTIVE_SECTION;
   }
 
   const targetNavLink = document.querySelector(`.sidebar-nav a[href*="${initialView}"]`);
   switchRoleView(initialView, targetNavLink);
 
-  // Load operational data for all authenticated roles (Waiters, Staff, Managers, Admins)
+  // Load operational data for authenticated roles
   try { if (typeof loadPOSProducts === 'function') loadPOSProducts(); } catch (e) {}
   try { if (typeof loadPOSTableSelector === 'function') loadPOSTableSelector(); } catch (e) {}
   try { if (typeof loadActiveOrders === 'function') loadActiveOrders(); } catch (e) {}
-  if (isFullAccess) {
+  if (['admin', 'manager'].includes(window.CURRENT_PORTAL)) {
     try { if (typeof loadWaiterMatrix === 'function') loadWaiterMatrix(); } catch (e) {}
   }
+});
 });
 
 

@@ -14,11 +14,11 @@ class Router {
      * Map of normalized role key to portal path
      */
     private static $portalMap = [
-        'admin'     => 'admin/index.php',
-        'manager'   => 'manager/index.php',
-        'reception' => 'reception/index.php',
-        'waiter'    => 'waiter/index.php',
-        'kitchen'   => 'kitchen/index.php',
+        'admin'     => 'admin/',
+        'manager'   => 'manager/',
+        'reception' => 'reception/',
+        'waiter'    => 'waiter/',
+        'kitchen'   => 'kitchen/',
     ];
 
     /**

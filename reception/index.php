@@ -11,5 +11,6 @@ require_once __DIR__ . '/../core/Router.php';
 
 Router::authorizePortal('reception');
 
+$currentPortal = 'reception';
 $initialSection = 'reception';
 require_once __DIR__ . '/../index.php';
