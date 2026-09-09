@@ -52,16 +52,24 @@ class Database {
             }
 
             try {
+                $pdoOptions = [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false
+                ];
+
+                // Safe initialization of MySQL charset attribute constant
+                if (defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
+                    $pdoOptions[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8mb4";
+                } else {
+                    $pdoOptions[1002] = "SET NAMES utf8mb4";
+                }
+
                 self::$conn = new PDO(
                     "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4",
                     $user,
                     $pass,
-                    [
-                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                        PDO::ATTR_EMULATE_PREPARES => false,
-                        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
-                    ]
+                    $pdoOptions
                 );
             } catch (PDOException $e) {
                 error_log("SMARTRESTA DB Connection Error: " . $e->getMessage());
