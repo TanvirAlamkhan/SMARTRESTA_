@@ -463,28 +463,100 @@ const SmartBilling = {
 
     try {
       const res = await SmartAPI.get('api/v1/payments/index.php');
-      if (res.success && res.data && res.data.length > 0) {
-        tbody.innerHTML = res.data.map(p => `
-          <tr>
-            <td><span class="font-mono">${p.payment_number || 'PM-' + p.id}</span></td>
-            <td><span class="font-mono">#${p.order_number}</span></td>
-            <td>${p.table_number ? `Table ${p.table_number}` : (p.order_type || 'Takeaway')}</td>
-            <td><span class="badge badge-neutral">${p.payment_method_name}</span></td>
-            <td class="price-tag">৳${parseFloat(p.amount).toFixed(2)}</td>
-            <td><small class="text-muted">${p.transaction_reference || 'N/A'}</small></td>
-            <td>${p.received_by_name || 'Cashier'}</td>
-            <td><span class="badge badge-success">${p.status}</span></td>
-            <td>
-              <button class="btn btn-secondary btn-sm" onclick="SmartBilling.openReceiptModal(${p.id}, ${p.order_id})">Receipt</button>
-              <button class="btn btn-danger btn-sm" onclick="SmartBilling.promptRefund(${p.id}, ${p.amount})">Refund</button>
-            </td>
-          </tr>
-        `).join('');
+      if (res.success && res.data) {
+        this.allPayments = res.data;
+        this.renderPaymentsTable(this.allPayments);
       } else {
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--text-muted);">No payment records recorded in database.</td></tr>`;
       }
     } catch (err) {
       tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--danger);">Failed to load payment history.</td></tr>`;
+    }
+  },
+
+  renderPaymentsTable(payments) {
+    const tbody = document.getElementById('payments-table-tbody');
+    if (!tbody) return;
+
+    if (!payments || payments.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--text-muted);">No matching payment records found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = payments.map(p => `
+      <tr>
+        <td><span class="font-mono">${p.payment_number || 'PM-' + p.id}</span></td>
+        <td><span class="font-mono">#${p.order_number}</span></td>
+        <td>${p.table_number ? `Table ${p.table_number}` : (p.order_type || 'Takeaway')}</td>
+        <td><span class="badge badge-neutral">${p.payment_method_name || 'N/A'}</span></td>
+        <td class="price-tag">৳${parseFloat(p.amount).toFixed(2)}</td>
+        <td><small class="text-muted">${p.transaction_reference || 'N/A'}</small></td>
+        <td>${p.received_by_name || 'Cashier'}</td>
+        <td><span class="badge badge-${p.status === 'COMPLETED' ? 'success' : (p.status && p.status.includes('REFUND') ? 'danger' : 'warning')}">${p.status}</span></td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="SmartBilling.openReceiptModal(${p.id}, ${p.order_id})">Receipt</button>
+          ${p.status === 'COMPLETED' ? `<button class="btn btn-danger btn-sm" onclick="SmartBilling.promptRefund(${p.id}, ${p.amount})">Refund</button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+  },
+
+  filterPayments() {
+    const searchVal = (document.getElementById('payments-search-input')?.value || '').toLowerCase().trim();
+    const methodVal = (document.getElementById('payments-method-filter')?.value || '').toLowerCase().trim();
+    const statusVal = (document.getElementById('payments-status-filter')?.value || '').toUpperCase().trim();
+
+    let filtered = (this.allPayments || []).filter(p => {
+      const matchSearch = !searchVal || 
+        (p.payment_number && p.payment_number.toLowerCase().includes(searchVal)) ||
+        (p.order_number && p.order_number.toString().toLowerCase().includes(searchVal)) ||
+        (p.transaction_reference && p.transaction_reference.toLowerCase().includes(searchVal));
+
+      const matchMethod = !methodVal || (p.payment_method_name && p.payment_method_name.toLowerCase().includes(methodVal));
+      const matchStatus = !statusVal || p.status === statusVal;
+
+      return matchSearch && matchMethod && matchStatus;
+    });
+
+    this.renderPaymentsTable(filtered);
+  },
+
+  async openOrderSelectionModal() {
+    try {
+      const res = await SmartAPI.get('api/v1/orders/index.php');
+      const tbody = document.getElementById('order-select-modal-tbody');
+      if (!tbody) return;
+
+      if (res.success && res.data && res.data.length > 0) {
+        const unpaidOrders = res.data.filter(o => o.payment_status !== 'PAID' && o.status !== 'CANCELLED');
+        if (unpaidOrders.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">No active unpaid orders found. All active orders are fully settled!</td></tr>`;
+        } else {
+          tbody.innerHTML = unpaidOrders.map(o => {
+            const grandTotal = parseFloat(o.grand_total || 0);
+            const paid = parseFloat(o.total_paid || 0);
+            const balance = Math.max(0, grandTotal - paid);
+            return `
+              <tr>
+                <td><span class="font-mono">#${o.order_number || o.id}</span></td>
+                <td>${o.table_number ? `Table ${o.table_number}` : (o.order_type || 'Takeaway')}</td>
+                <td>${o.waiter_name || 'Staff'}</td>
+                <td>৳${grandTotal.toFixed(2)}</td>
+                <td>৳${paid.toFixed(2)}</td>
+                <td><strong style="color:var(--warning);">৳${balance.toFixed(2)}</strong></td>
+                <td>
+                  <button class="btn btn-primary btn-sm" onclick="SmartModal.close('order-select-modal'); SmartBilling.openBillingModal(${o.id});">💳 Settle Payment</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">No orders found in database.</td></tr>`;
+      }
+      SmartModal.open('order-select-modal');
+    } catch (err) {
+      SmartNotifications.show('Failed to load active orders: ' + err.message, 'danger');
     }
   },
 
