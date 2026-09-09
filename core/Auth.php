@@ -194,7 +194,16 @@ class Auth {
                 Response::json(false, 401, "Authentication required. Please log in.");
             } else {
                 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-                $landingUrl = (strpos($scriptName, '/public/') !== false) ? '../landing.php' : 'landing.php';
+                $isSubdir = (
+                    strpos($scriptName, '/reception/') !== false ||
+                    strpos($scriptName, '/waiter/') !== false ||
+                    strpos($scriptName, '/kitchen/') !== false ||
+                    strpos($scriptName, '/admin/') !== false ||
+                    strpos($scriptName, '/manager/') !== false ||
+                    strpos($scriptName, '/public/') !== false ||
+                    strpos($scriptName, '/php/') !== false
+                );
+                $landingUrl = $isSubdir ? '../landing.php' : './landing.php';
                 header("Location: " . $landingUrl);
                 exit;
             }
