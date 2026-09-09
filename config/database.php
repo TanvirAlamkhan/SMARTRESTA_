@@ -1,7 +1,7 @@
 <?php
 /**
  * SMARTRESTA Production Database Connection Manager
- * Railway-Ready PDO Singleton with Multi-URL & Variable Auto-Detection
+ * Railway-Ready PDO Singleton with Multi-URL & Priority Environment Auto-Detection
  */
 
 require_once __DIR__ . '/env.php';
@@ -17,8 +17,16 @@ class Database {
             $user = 'root';
             $pass = '';
 
-            // Check if Railway provides a connection URL (MYSQLURL / MYSQL_URL / DATABASE_URL)
+            // Priority 1: Check Railway MySQL URL (MYSQLURL / MYSQL_URL / DATABASE_URL)
             $dbUrl = getenv('MYSQLURL') ?: getenv('MYSQL_URL') ?: getenv('DATABASE_URL');
+            
+            // Priority 2: Check Railway explicit MySQL environment variables (MYSQLHOST / MYSQL_HOST)
+            $railwayHost = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST');
+            $railwayPort = getenv('MYSQLPORT') ?: getenv('MYSQL_PORT');
+            $railwayDb   = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE');
+            $railwayUser = getenv('MYSQLUSER') ?: getenv('MYSQL_USER');
+            $railwayPass = getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : (getenv('MYSQL_PASSWORD') !== false ? getenv('MYSQL_PASSWORD') : null);
+
             if (!empty($dbUrl)) {
                 $parsed = parse_url($dbUrl);
                 if ($parsed && isset($parsed['host'])) {
@@ -28,12 +36,19 @@ class Database {
                     $pass = $parsed['pass'] ?? '';
                     $dbname = ltrim($parsed['path'] ?? 'smartresta_db', '/');
                 }
+            } elseif (!empty($railwayHost)) {
+                $host = $railwayHost;
+                $port = $railwayPort ?: '3306';
+                $dbname = $railwayDb ?: 'smartresta_db';
+                $user = $railwayUser ?: 'root';
+                $pass = $railwayPass !== null ? $railwayPass : '';
             } else {
-                $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
-                $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: '3306';
-                $dbname = getenv('DB_DATABASE') ?: getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: 'smartresta_db';
-                $user = getenv('DB_USERNAME') ?: getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: 'root';
-                $pass = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : (getenv('MYSQL_PASSWORD') !== false ? getenv('MYSQL_PASSWORD') : ''));
+                // Priority 3: Fallback to local DB_HOST / DB_USERNAME in .env
+                $host = getenv('DB_HOST') ?: 'localhost';
+                $port = getenv('DB_PORT') ?: '3306';
+                $dbname = getenv('DB_DATABASE') ?: 'smartresta_db';
+                $user = getenv('DB_USERNAME') ?: 'root';
+                $pass = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : '';
             }
 
             try {
