@@ -169,7 +169,7 @@ async function handleLogin(e) {
         SmartNotifications.show(`Welcome back, ${res.data.user.name}!`, 'success');
       }
       setTimeout(() => {
-        window.location.href = '../index.php';
+        window.location.href = (res.data && res.data.redirect) ? res.data.redirect : '../index.php';
       }, 500);
     }
   } catch (err) {

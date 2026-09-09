@@ -15,7 +15,21 @@ const SmartPOS = {
     this.selectedSessionId = sessionId;
     const titleEl = document.getElementById('pos-table-heading');
     if (titleEl) {
-      titleEl.textContent = `Table ${tableNum} Order ${sessionId ? `(#DS-${sessionId})` : '(No Session)'}`;
+      titleEl.textContent = tableId ? `Table ${tableNum} Order ${sessionId ? `(#DS-${sessionId})` : '(No Session)'}` : 'Quick Takeaway / Walk-in';
+    }
+  },
+
+  selectTakeaway() {
+    this.selectedTableId = null;
+    this.selectedSessionId = null;
+    const select = document.getElementById('pos-table-selector');
+    if (select) select.value = '';
+    const badge = document.getElementById('pos-table-heading');
+    if (badge) badge.textContent = 'Takeaway / Quick Order';
+    const heading = document.getElementById('pos-table-heading-cart');
+    if (heading) heading.textContent = 'Takeaway Order';
+    if (window.SmartNotifications) {
+      SmartNotifications.show('Set order mode to Takeaway / Quick Order', 'info', 2000);
     }
   },
 
@@ -100,7 +114,7 @@ const SmartPOS = {
             <span class="cart-item-meta">
               ৳${item.unit_price.toFixed(2)} × ${item.qty} | <span class="station-badge ${item.station.toLowerCase().replace(/\s+/g, '-')}">${item.station}</span>
             </span>
-            ${item.modifiers.length > 0 ? `
+            ${item.modifiers && item.modifiers.length > 0 ? `
               <div style="font-size:0.75rem; color:var(--accent-dark); margin-top:2px;">
                 + ${item.modifiers.map(m => `${m.name} (+৳${m.price})`).join(', ')}
               </div>
@@ -132,14 +146,26 @@ const SmartPOS = {
     }
 
     try {
+      let orderType = 'DINE_IN';
+      if (!this.selectedTableId) {
+        const tableSelect = document.getElementById('pos-table-selector');
+        if (tableSelect && tableSelect.value) {
+          this.selectedTableId = tableSelect.value;
+          const opt = tableSelect.options[tableSelect.selectedIndex];
+          this.selectedSessionId = opt.getAttribute('data-session') || null;
+        } else {
+          orderType = 'TAKEAWAY';
+        }
+      }
+
       // 1. Create Draft Order
       const draftRes = await SmartAPI.post('api/v1/orders/index.php', {
-        order_type: 'DINE_IN',
-        table_id: this.selectedTableId,
-        dining_session_id: this.selectedSessionId
+        order_type: orderType,
+        table_id: this.selectedTableId || null,
+        dining_session_id: this.selectedSessionId || null
       });
 
-      if (!draftRes.success || !draftRes.data.order_id) {
+      if (!draftRes.success || !draftRes.data || !draftRes.data.order_id) {
         throw new Error(draftRes.message || 'Failed to initialize draft order');
       }
 
@@ -150,28 +176,31 @@ const SmartPOS = {
         await SmartAPI.post('api/v1/orders/items.php', {
           order_id: orderId,
           product_id: item.product_id,
-          variant_id: item.variant_id,
-          modifier_ids: item.modifiers.map(m => m.id),
+          variant_id: item.variant_id || null,
+          modifier_ids: item.modifiers ? item.modifiers.map(m => m.id) : [],
           quantity: item.qty
         });
       }
 
-      // 3. Submit Order
+      // 3. Submit Order to Kitchen & Dispatch Engine
       const submitRes = await SmartAPI.post('api/v1/orders/submit.php', { order_id: orderId });
 
       if (submitRes.success) {
-        SmartNotifications.show(`Order #${submitRes.data.order_number} successfully placed & routed!`, 'success');
+        const orderNum = submitRes.data ? submitRes.data.order_number : orderId;
+        SmartNotifications.show(`Order #${orderNum} successfully placed & routed to kitchen!`, 'success');
         const chosenMethod = this.paymentMethod;
         this.clearCart();
         if (window.loadActiveOrders) loadActiveOrders();
         if (window.loadFloorTables) loadFloorTables();
 
-        // If bKash or billing checkout selected, open Settlement Modal with bKash QR
+        // If bKash or billing checkout selected, open Settlement Modal
         if (chosenMethod === 'bKash' && window.SmartBilling) {
           setTimeout(() => {
             SmartBilling.openBillingModal(orderId);
           }, 300);
         }
+      } else {
+        throw new Error(submitRes.message || 'Failed to submit order');
       }
 
     } catch (err) {
