@@ -345,8 +345,19 @@ $currentUser = Auth::user();
 
     <div class="cart-summary">
       <div class="cart-summary-row"><span>Subtotal</span><span id="pub-cart-subtotal">৳0.00</span></div>
+      <div id="pub-cart-discount-row" class="cart-summary-row" style="display:none; color:#10B981; font-weight:600;"><span>Coupon Discount</span><span id="pub-cart-discount">-৳0.00</span></div>
       <div class="cart-summary-row"><span>VAT (5%)</span><span id="pub-cart-tax">৳0.00</span></div>
       <div class="cart-summary-row cart-summary-total"><span>Grand Total</span><span id="pub-cart-total">৳0.00</span></div>
+    </div>
+
+    <!-- Promotional Coupon Section -->
+    <div style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px;">
+      <label style="font-size:0.75rem; font-weight:700; color:var(--accent); display:block; margin-bottom:4px;">🎟️ Coupon Code</label>
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="pub-coupon-input" class="form-control" placeholder="Code (e.g. SAVE100)" style="font-weight:600; text-transform:uppercase;">
+        <button class="btn btn-secondary btn-sm" onclick="applyPublicCoupon()">Apply</button>
+      </div>
+      <div id="pub-coupon-status" style="display:none; font-size:0.8rem; color:#10B981; font-weight:600; margin-top:6px;"></div>
     </div>
 
     <!-- Customer Details Form -->
@@ -504,6 +515,34 @@ function updatePublicQty(id, delta) {
   renderPublicCart();
 }
 
+let pubAppliedCoupon = null;
+
+async function applyPublicCoupon() {
+  const code = (document.getElementById('pub-coupon-input').value || '').trim();
+  if (!code) {
+    if (window.SmartNotifications) SmartNotifications.show('Please enter a coupon code first', 'warning');
+    return;
+  }
+  const subtotal = pubCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+  try {
+    const res = await SmartAPI.post('../api/v1/crm/coupons.php', { action: 'validate', code: code, order_amount: subtotal });
+    if (res.success && res.data) {
+      pubAppliedCoupon = res.data;
+      const statusEl = document.getElementById('pub-coupon-status');
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.innerHTML = `🎟️ Coupon <strong>${res.data.code}</strong> Applied (-৳${parseFloat(res.data.discount_amount).toFixed(2)}) ✓`;
+      }
+      renderPublicCart();
+      if (window.SmartNotifications) SmartNotifications.show(`Coupon ${res.data.code} applied successfully!`, 'success');
+    } else {
+      alert("Coupon Error: " + (res.message || 'Invalid coupon code'));
+    }
+  } catch (err) {
+    alert("Coupon Error: " + err.message);
+  }
+}
+
 function renderPublicCart() {
   const container = document.getElementById('pub-cart-items');
   const countBadge = document.getElementById('pub-cart-count');
@@ -529,10 +568,21 @@ function renderPublicCart() {
   }
 
   const subtotal = pubCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-  const tax = Math.round((subtotal * 0.05 + Number.EPSILON) * 100) / 100;
-  const total = subtotal + tax;
+  let discount = 0;
+  if (pubAppliedCoupon) {
+    discount = parseFloat(pubAppliedCoupon.discount_amount || 0);
+  }
+
+  const taxable = Math.max(0, subtotal - discount);
+  const tax = Math.round((taxable * 0.05 + Number.EPSILON) * 100) / 100;
+  const total = taxable + tax;
 
   document.getElementById('pub-cart-subtotal').textContent = `৳${subtotal.toFixed(2)}`;
+  const discRow = document.getElementById('pub-cart-discount-row');
+  if (discRow) {
+    discRow.style.display = discount > 0 ? 'flex' : 'none';
+    document.getElementById('pub-cart-discount').textContent = `-৳${discount.toFixed(2)}`;
+  }
   document.getElementById('pub-cart-tax').textContent = `৳${tax.toFixed(2)}`;
   document.getElementById('pub-cart-total').textContent = `৳${total.toFixed(2)}`;
 }
@@ -574,14 +624,27 @@ async function submitPublicOrder() {
       });
     }
 
+    if (pubAppliedCoupon) {
+      await SmartAPI.post('../api/v1/orders/coupon.php', {
+        action: 'apply',
+        order_id: orderId,
+        coupon_code: pubAppliedCoupon.code
+      });
+    }
+
     const submitRes = await SmartAPI.post('../api/v1/orders/submit.php', { order_id: orderId });
     if (submitRes.success) {
       const orderNum = submitRes.data ? submitRes.data.order_number : orderId;
       alert(`🎉 Thank you ${name}! Your order #${orderNum} has been received and sent to the kitchen.`);
       pubCart = [];
+      pubAppliedCoupon = null;
       renderPublicCart();
       document.getElementById('pub-cust-name').value = '';
       document.getElementById('pub-cust-phone').value = '';
+      document.getElementById('pub-cust-notes').value = '';
+      if (document.getElementById('pub-coupon-input')) document.getElementById('pub-coupon-input').value = '';
+      if (document.getElementById('pub-coupon-status')) document.getElementById('pub-coupon-status').style.display = 'none';
+    }
       document.getElementById('pub-cust-notes').value = '';
     }
   } catch (err) {

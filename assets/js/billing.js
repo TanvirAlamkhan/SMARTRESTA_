@@ -70,7 +70,10 @@ const SmartBilling = {
       let summaryHtml = `
         <div style="background:var(--surface); border:1px solid var(--border); padding:16px; border-radius:8px; margin-bottom:20px;">
           <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Item Subtotal</span><span>৳${bill.subtotal.toFixed(2)}</span></div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Discount</span><span>- ৳${bill.discount.toFixed(2)}</span></div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; ${bill.discount > 0 ? 'color:#10B981; font-weight:600;' : ''}">
+            <span>Discount ${bill.coupon_code ? `(Coupon: <strong>${bill.coupon_code}</strong>)` : ''}</span>
+            <span>- ৳${bill.discount.toFixed(2)}</span>
+          </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>VAT (5%)</span><span>+ ৳${bill.tax.toFixed(2)}</span></div>
           <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Service Charge</span><span>+ ৳${bill.service_charge.toFixed(2)}</span></div>
           <div style="display:flex; justify-content:space-between; font-weight:700; font-size:1.15rem; border-top:1px dashed var(--border); padding-top:8px; margin-top:8px; color:var(--primary);">

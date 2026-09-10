@@ -489,14 +489,14 @@ $currentUser = Auth::user();
         <a href="public/login.php" class="portal-link">Access Login Portal &rarr;</a>
       </div>
 
-      <!-- 2. POS & Order Entry -->
+      <!-- 2. POS ORDER PLACE -->
       <div class="portal-card">
         <div>
-          <div class="portal-icon">🖥️</div>
-          <div class="portal-title">POS & Waiter Ordering</div>
-          <div class="portal-desc">Touch POS interface for taking orders, selecting size modifiers, managing dining sessions, and applying discounts.</div>
+          <div class="portal-icon">🛒</div>
+          <div class="portal-title">POS ORDER PLACE</div>
+          <div class="portal-desc">Touch POS interface for taking orders, selecting size modifiers, applying coupons, and submitting orders directly to kitchen & database.</div>
         </div>
-        <a href="index.php#pos-view" class="portal-link">Open POS Terminal &rarr;</a>
+        <a href="waiter/index.php" class="portal-link">Open POS ORDER PLACE &rarr;</a>
       </div>
 
       <!-- 3. KDS Production -->

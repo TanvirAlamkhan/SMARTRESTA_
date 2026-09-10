@@ -8,6 +8,7 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/AuditLogger.php';
 require_once __DIR__ . '/MenuEngine.php';
 require_once __DIR__ . '/RoutingEngine.php';
+require_once __DIR__ . '/CRMEngine.php';
 
 class OrderEngine {
 
@@ -519,5 +520,95 @@ class OrderEngine {
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function applyCoupon(int $orderId, string $couponCode, int $userId = 1): array {
+        $db = Database::getConnection();
+        $stmtOrd = $db->prepare("SELECT * FROM orders WHERE id = :id");
+        $stmtOrd->execute(['id' => $orderId]);
+        $order = $stmtOrd->fetch(PDO::FETCH_ASSOC);
+
+        if (!$order) {
+            throw new Exception("Order #{$orderId} not found.");
+        }
+        if (in_array($order['order_status'], ['COMPLETED', 'CANCELLED', 'REFUNDED'], true)) {
+            throw new Exception("Cannot apply coupon to an order with status {$order['order_status']}.");
+        }
+
+        $couponRes = CRMEngine::validateCoupon(
+            $couponCode,
+            (float)$order['subtotal'],
+            $order['customer_id'] ? (int)$order['customer_id'] : null,
+            (int)$order['branch_id']
+        );
+
+        if (!$couponRes['valid']) {
+            throw new Exception($couponRes['message']);
+        }
+
+        $discountAmount = (float)$couponRes['discount_amount'];
+        $couponId = (int)$couponRes['coupon_id'];
+
+        $db->beginTransaction();
+        try {
+            $stmtUpd = $db->prepare("
+                UPDATE orders 
+                SET coupon_id = :cid, coupon_code = :code, discount = :disc 
+                WHERE id = :id
+            ");
+            $stmtUpd->execute([
+                'cid' => $couponId,
+                'code' => $couponRes['code'],
+                'disc' => $discountAmount,
+                'id' => $orderId
+            ]);
+
+            // Recalculate Totals
+            $totals = self::recalculateOrderTotals($orderId);
+
+            // Record Coupon Usage
+            CRMEngine::recordCouponUsage($couponId, $orderId, $order['customer_id'] ? (int)$order['customer_id'] : null, $discountAmount, $userId);
+
+            AuditLogger::log($userId, 'COUPON_APPLIED', 'order', $orderId, null, [
+                'coupon_code' => $couponRes['code'],
+                'discount' => $discountAmount,
+                'grand_total' => $totals['total']
+            ]);
+
+            $db->commit();
+
+            return [
+                'order_id' => $orderId,
+                'coupon_id' => $couponId,
+                'coupon_code' => $couponRes['code'],
+                'discount_amount' => $discountAmount,
+                'subtotal' => $totals['subtotal'],
+                'tax' => $totals['tax'],
+                'total' => $totals['total']
+            ];
+        } catch (Exception $e) {
+            $db->rollBack();
+            throw $e;
+        }
+    }
+
+    public static function removeCoupon(int $orderId, int $userId = 1): array {
+        $db = Database::getConnection();
+        $db->beginTransaction();
+        try {
+            $db->prepare("UPDATE orders SET coupon_id = NULL, coupon_code = NULL, discount = 0.00 WHERE id = :id")->execute(['id' => $orderId]);
+            $db->prepare("DELETE FROM coupon_usage WHERE order_id = :id")->execute(['id' => $orderId]);
+            $totals = self::recalculateOrderTotals($orderId);
+            $db->commit();
+            return [
+                'order_id' => $orderId,
+                'subtotal' => $totals['subtotal'],
+                'tax' => $totals['tax'],
+                'total' => $totals['total']
+            ];
+        } catch (Exception $e) {
+            $db->rollBack();
+            throw $e;
+        }
     }
 }

@@ -199,7 +199,7 @@ const SmartKDS = {
                   <span>${item.quantity}× ${item.product_name} ${item.variant_name ? `<small>(${item.variant_name})</small>` : ''}</span>
                 </div>
                 ${item.modifiers_snapshot ? `<div style="font-size:0.8rem; color:var(--accent-dark); margin-top:2px;">+ ${item.modifiers_snapshot}</div>` : ''}
-                ${item.special_instructions ? `<div style="font-size:0.8rem; color:var(--warning-dark); font-weight:500; margin-top:2px;">Note: "${item.special_instructions}"</div>` : ''}
+                ${(item.special_instructions || item.notes) ? `<div style="font-size:0.85rem; color:#F59E0B; font-weight:700; margin-top:2px;">📝 Instruction: "${item.special_instructions || item.notes}"</div>` : ''}
               </div>
             `).join('')}
           </div>

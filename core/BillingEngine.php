@@ -112,6 +112,7 @@ class BillingEngine {
             'customer_name' => $order['customer_name'] ?? 'Guest',
             'order_status' => $order['order_status'],
             'payment_status' => $calculatedPaymentStatus,
+            'coupon_code' => $order['coupon_code'] ?? null,
             'subtotal' => round($subtotal, 2),
             'discount' => round($discount, 2),
             'taxable_amount' => round($taxableAmount, 2),

@@ -38,7 +38,7 @@ $portalConfig = [
             ['id' => 'tables', 'icon' => '🪑', 'label' => 'Floors & Tables'],
             ['id' => 'menu', 'icon' => '🍔', 'label' => 'Menu & Catalog'],
             ['id' => 'waiter', 'icon' => '🍷', 'label' => 'Waiter Workspace'],
-            ['id' => 'pos', 'icon' => '💳', 'label' => 'POS & Ordering'],
+            ['id' => 'pos', 'icon' => '🛒', 'label' => 'POS ORDER PLACE'],
             ['id' => 'kds', 'icon' => '🍳', 'label' => 'Kitchen Display (KDS)'],
             ['id' => 'kitchen', 'icon' => '👨‍🍳', 'label' => 'Kitchen Production'],
             ['id' => 'routing', 'icon' => '🔀', 'label' => 'Station Routing'],
@@ -59,6 +59,7 @@ $portalConfig = [
         'default_section' => 'admin',
         'nav' => [
             ['id' => 'admin', 'icon' => '📊', 'label' => 'Manager Dashboard'],
+            ['id' => 'pos', 'icon' => '🛒', 'label' => 'POS ORDER PLACE'],
             ['id' => 'waiter', 'icon' => '🍷', 'label' => 'Waiter Performance'],
             ['id' => 'reception', 'icon' => '🛎️', 'label' => 'Reception Front Desk'],
             ['id' => 'tables', 'icon' => '🪑', 'label' => 'Floors & Tables'],
@@ -72,7 +73,7 @@ $portalConfig = [
             ['id' => 'finance', 'icon' => '💵', 'label' => 'Finance & Shifts'],
             ['id' => 'crm', 'icon' => '🤝', 'label' => 'Customers & CRM'],
         ],
-        'views' => ['admin', 'waiter', 'reception', 'tables', 'menu', 'kds', 'kitchen', 'payments', 'commissions_review', 'inventory', 'reports', 'finance', 'crm']
+        'views' => ['admin', 'pos', 'waiter', 'reception', 'tables', 'menu', 'kds', 'kitchen', 'payments', 'commissions_review', 'inventory', 'reports', 'finance', 'crm']
     ],
     'reception' => [
         'name' => 'Reception Portal',
@@ -80,7 +81,7 @@ $portalConfig = [
         'default_section' => 'reception',
         'nav' => [
             ['id' => 'reception', 'icon' => '🛎️', 'label' => 'Reception Front Desk'],
-            ['id' => 'pos', 'icon' => '💳', 'label' => 'POS Billing & Checkout'],
+            ['id' => 'pos', 'icon' => '🛒', 'label' => 'POS ORDER PLACE'],
             ['id' => 'tables', 'icon' => '🪑', 'label' => 'Tables & Sessions'],
             ['id' => 'payments', 'icon' => '💰', 'label' => 'Billing & Payment History'],
             ['id' => 'crm', 'icon' => '🤝', 'label' => 'Customers & Reservations'],
@@ -90,14 +91,14 @@ $portalConfig = [
     'waiter' => [
         'name' => 'Waiter Portal',
         'badge' => 'WAITER',
-        'default_section' => 'waiter',
+        'default_section' => 'pos',
         'nav' => [
+            ['id' => 'pos', 'icon' => '🛒', 'label' => 'POS ORDER PLACE'],
             ['id' => 'waiter', 'icon' => '🍷', 'label' => 'Waiter Workspace'],
-            ['id' => 'pos', 'icon' => '💳', 'label' => 'POS & Table Ordering'],
             ['id' => 'tables', 'icon' => '🪑', 'label' => 'Floors & Tables'],
             ['id' => 'kds', 'icon' => '🍳', 'label' => 'Kitchen Feed'],
         ],
-        'views' => ['waiter', 'pos', 'tables', 'kds']
+        'views' => ['pos', 'waiter', 'tables', 'kds']
     ],
     'kitchen' => [
         'name' => 'Kitchen Portal',
