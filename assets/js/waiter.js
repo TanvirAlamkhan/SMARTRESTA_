@@ -3,7 +3,7 @@
  * Module: SmartWaiter
  */
 
-const SmartWaiter = {
+var SmartWaiter = window.SmartWaiter || {
   activeTab: 'pos',
   allTables: [],
   allSessions: [],
@@ -74,7 +74,7 @@ const SmartWaiter = {
       const [tblRes, ordRes, kdsRes] = await Promise.allSettled([
         SmartAPI.get('api/v1/tables/index.php'),
         SmartAPI.get('api/v1/orders/index.php'),
-        SmartAPI.get('api/v1/kds/index.php')
+        SmartAPI.get('api/v1/kds/tickets.php')
       ]);
 
       // Active Tables & Sessions
@@ -115,7 +115,8 @@ const SmartWaiter = {
 
       // Kitchen Ticket Status
       if (kdsRes.status === 'fulfilled' && kdsRes.value.success && kdsRes.value.data) {
-        const tickets = kdsRes.value.data;
+        const rawData = kdsRes.value.data;
+        const tickets = Array.isArray(rawData) ? rawData : (rawData.tickets || []);
         const prep = tickets.filter(t => (t.status || '').toUpperCase() === 'PREPARING').length;
         const ready = tickets.filter(t => (t.status || '').toUpperCase() === 'READY').length;
 
@@ -152,9 +153,10 @@ const SmartWaiter = {
     if (!selector) return;
 
     try {
-      const res = await SmartAPI.get('api/v1/crm/index.php');
+      const res = await SmartAPI.get('api/v1/crm/customers.php');
       if (res.success && res.data) {
-        selector.innerHTML = `<option value="">— Walk-in / Guest —</option>` + res.data.map(c => `
+        const customerList = Array.isArray(res.data) ? res.data : (res.data.customers || []);
+        selector.innerHTML = `<option value="">— Walk-in / Guest —</option>` + customerList.map(c => `
           <option value="${c.id}">${c.name} (${c.phone || 'No Phone'}) ${c.is_vip ? '⭐ VIP' : ''}</option>
         `).join('');
       }
@@ -455,12 +457,13 @@ const SmartWaiter = {
     if (!grid) return;
 
     try {
-      const res = await SmartAPI.get('api/v1/kds/index.php');
+      const res = await SmartAPI.get('api/v1/kds/tickets.php');
       if (res.success && res.data) {
-        this.kitchenTickets = res.data;
+        const tickets = Array.isArray(res.data) ? res.data : (res.data.tickets || []);
+        this.kitchenTickets = tickets;
 
         // Highlight READY Tickets Banner
-        const readyTickets = res.data.filter(t => (t.status || '').toUpperCase() === 'READY');
+        const readyTickets = tickets.filter(t => (t.status || '').toUpperCase() === 'READY');
         if (banner) {
           if (readyTickets.length > 0) {
             banner.style.display = 'block';

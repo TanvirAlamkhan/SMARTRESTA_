@@ -1405,21 +1405,6 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
   </div>
 </div>
 
-<!-- Scripts -->
-<script src="assets/js/app.js"></script>
-<script src="assets/js/ajax.js"></script>
-<script src="assets/js/notifications.js"></script>
-<script src="assets/js/modal.js"></script>
-<script src="assets/js/pos.js"></script>
-<script src="assets/js/routing.js"></script>
-<script src="assets/js/kds.js"></script>
-<script src="assets/js/billing.js"></script>
-<script src="assets/js/commissions.js"></script>
-<script src="assets/js/inventory.js"></script>
-<script src="assets/js/reports.js"></script>
-<script src="assets/js/finance.js"></script>
-<script src="assets/js/crm.js"></script>
-
 <!-- Open Shift Modal -->
 <div id="open-shift-modal" class="modal-backdrop">
   <div class="modal-content">
@@ -1660,8 +1645,9 @@ function switchRoleView(viewId, navEl, event) {
   } else if (cleanId === 'tables') {
     if (typeof loadFloorTables === 'function') loadFloorTables();
   } else if (cleanId === 'pos') {
-    if (typeof loadPOSProducts === 'function') loadPOSProducts();
-    if (typeof loadPOSTableSelector === 'function') loadPOSTableSelector();
+    if (typeof SmartPOS !== 'undefined' && typeof SmartPOS.init === 'function') SmartPOS.init();
+  } else if (cleanId === 'routing') {
+    if (typeof SmartRouting !== 'undefined' && typeof SmartRouting.init === 'function') SmartRouting.init();
   } else if (cleanId === 'menu') {
     if (typeof loadCategoryOptions === 'function') loadCategoryOptions();
     if (typeof loadProductCatalog === 'function') loadProductCatalog();
@@ -2373,8 +2359,6 @@ document.addEventListener('DOMContentLoaded', () => {
   switchRoleView(initialView, targetNavLink);
 
   // Load operational data for authenticated roles
-  try { if (typeof loadPOSProducts === 'function') loadPOSProducts(); } catch (e) {}
-  try { if (typeof loadPOSTableSelector === 'function') loadPOSTableSelector(); } catch (e) {}
   try { if (typeof loadActiveOrders === 'function') loadActiveOrders(); } catch (e) {}
   if (['admin', 'manager'].includes(window.CURRENT_PORTAL)) {
     try { if (typeof loadWaiterMatrix === 'function') loadWaiterMatrix(); } catch (e) {}

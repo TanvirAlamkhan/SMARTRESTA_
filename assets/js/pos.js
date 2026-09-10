@@ -4,7 +4,7 @@
  * line-item cooking instructions, coupon validation engine, and multi-station ticket routing.
  */
 
-const SmartPOS = {
+var SmartPOS = window.SmartPOS || {
   cart: [],
   selectedTableId: null,
   selectedTableNumber: null,

@@ -3,7 +3,7 @@
  * Prompt 11: Inventory Engine & Stock Control
  */
 
-const SmartInventory = {
+var SmartInventory = window.SmartInventory || {
   ingredients: [],
   categories: [],
   locations: [],
@@ -774,3 +774,5 @@ const SmartInventory = {
 document.addEventListener('DOMContentLoaded', () => {
   SmartInventory.init();
 });
+
+window.SmartInventory = SmartInventory;

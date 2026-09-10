@@ -3,7 +3,7 @@
  * Prompt 13 Compliance
  */
 
-const SmartFinance = {
+var SmartFinance = window.SmartFinance || {
   currentTab: 'overview',
   activeShift: null,
 
@@ -341,3 +341,5 @@ document.addEventListener('DOMContentLoaded', () => {
     SmartFinance.init();
   }
 });
+
+window.SmartFinance = SmartFinance;

@@ -4,7 +4,7 @@
  * Includes Dynamic bKash Payment QR Generator, Merchant Number & Amount Auto-Fill, and 1-Click Copy Helpers.
  */
 
-const SmartBilling = {
+var SmartBilling = window.SmartBilling || {
   paymentMethods: [],
   currentBill: null,
 
@@ -682,3 +682,5 @@ const SmartBilling = {
 document.addEventListener('DOMContentLoaded', () => {
   SmartBilling.init();
 });
+
+window.SmartBilling = SmartBilling;

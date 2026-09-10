@@ -3,7 +3,7 @@
  * Prompt 10: Kitchen Display System, Counter Operations & Multi-Station Production Workflow
  */
 
-const SmartKDS = {
+var SmartKDS = window.SmartKDS || {
   stations: [],
   currentStationId: 0,
   pollingTimer: null,
@@ -433,3 +433,5 @@ const SmartKDS = {
 document.addEventListener('DOMContentLoaded', () => {
   SmartKDS.init();
 });
+
+window.SmartKDS = SmartKDS;

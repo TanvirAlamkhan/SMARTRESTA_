@@ -3,7 +3,7 @@
  * Prompt 12: Admin & Manager Dashboard, Advanced Reporting, Analytics & Drill-Down Engine
  */
 
-const SmartReports = {
+var SmartReports = window.SmartReports || {
     currentTab: 'overview',
     currentPreset: 'today',
     dateFrom: '',
@@ -136,8 +136,7 @@ const SmartReports = {
     async loadOverviewDashboard() {
         this.showTabContainer('tab-overview-content');
         try {
-            const response = await fetch(`/api/v1/dashboard/overview.php?${this.getQueryString()}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/dashboard/overview.php?${this.getQueryString()}`);
 
             if (res.success && res.data) {
                 const kpis = res.data.kpis;
@@ -169,8 +168,7 @@ const SmartReports = {
 
         container.innerHTML = `<tr><td colspan="6" class="text-center">Loading sales analytics...</td></tr>`;
         try {
-            const response = await fetch(`/api/v1/reports/sales.php?${this.getQueryString()}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/reports/sales.php?${this.getQueryString()}`);
 
             if (res.success && res.data.sales_data.length > 0) {
                 container.innerHTML = res.data.sales_data.map(r => `
@@ -197,15 +195,14 @@ const SmartReports = {
         const container = document.getElementById('table-orders-body');
         if (!container) return;
 
-        let url = `/api/v1/reports/orders.php?${this.getQueryString()}&page=${this.ordersFilter.page}&per_page=${this.ordersFilter.perPage}`;
+        let url = `api/v1/reports/orders.php?${this.getQueryString()}&page=${this.ordersFilter.page}&per_page=${this.ordersFilter.perPage}`;
         if (this.ordersFilter.status) url += `&order_status=${this.ordersFilter.status}`;
         if (this.ordersFilter.search) url += `&search=${encodeURIComponent(this.ordersFilter.search)}`;
 
         container.innerHTML = `<tr><td colspan="9" class="text-center">Loading orders data...</td></tr>`;
 
         try {
-            const response = await fetch(url);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(url);
 
             if (res.success && res.data.items.length > 0) {
                 container.innerHTML = res.data.items.map(o => `
@@ -244,8 +241,7 @@ const SmartReports = {
 
         container.innerHTML = `<tr><td colspan="8" class="text-center">Loading staff performance data...</td></tr>`;
         try {
-            const response = await fetch(`/api/v1/reports/waiters.php?${this.getQueryString()}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/reports/waiters.php?${this.getQueryString()}`);
 
             if (res.success && res.data.items.length > 0) {
                 container.innerHTML = res.data.items.map(w => `
@@ -276,8 +272,7 @@ const SmartReports = {
 
         container.innerHTML = `<tr><td colspan="7" class="text-center">Loading table performance...</td></tr>`;
         try {
-            const response = await fetch(`/api/v1/reports/tables.php?${this.getQueryString()}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/reports/tables.php?${this.getQueryString()}`);
 
             if (res.success && res.data.items.length > 0) {
                 container.innerHTML = res.data.items.map(t => `
@@ -307,8 +302,7 @@ const SmartReports = {
 
         container.innerHTML = `<tr><td colspan="8" class="text-center">Loading product margin analysis...</td></tr>`;
         try {
-            const response = await fetch(`/api/v1/reports/products.php?${this.getQueryString()}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/reports/products.php?${this.getQueryString()}`);
 
             if (res.success && res.data.items.length > 0) {
                 container.innerHTML = res.data.items.map(p => `
@@ -340,8 +334,7 @@ const SmartReports = {
 
         containerMethods.innerHTML = `<tr><td colspan="5" class="text-center">Loading payment totals...</td></tr>`;
         try {
-            const response = await fetch(`/api/v1/reports/payments.php?${this.getQueryString()}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/reports/payments.php?${this.getQueryString()}`);
 
             if (res.success && res.data.payment_methods.length > 0) {
                 containerMethods.innerHTML = res.data.payment_methods.map(pm => `
@@ -386,8 +379,7 @@ const SmartReports = {
 
         container.innerHTML = `<tr><td colspan="6" class="text-center">Loading station SLAs...</td></tr>`;
         try {
-            const response = await fetch(`/api/v1/reports/kds.php?${this.getQueryString()}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/reports/kds.php?${this.getQueryString()}`);
 
             if (res.success && res.data.stations.length > 0) {
                 container.innerHTML = res.data.stations.map(st => `
@@ -415,8 +407,7 @@ const SmartReports = {
         const containerCons = document.getElementById('table-inv-cons-body');
 
         try {
-            const response = await fetch(`/api/v1/reports/inventory.php?${this.getQueryString()}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/reports/inventory.php?${this.getQueryString()}`);
 
             if (res.success && res.data) {
                 document.getElementById('report-inv-val-count').innerText = res.data.stock_summary.total_ingredients;
@@ -458,8 +449,7 @@ const SmartReports = {
     // 10. Order Drill-Down Drawer / Modal
     async openOrderDrilldown(orderId) {
         try {
-            const response = await fetch(`/api/v1/reports/orders_drilldown.php?order_id=${orderId}`);
-            const res = await (window.SmartAPI ? SmartAPI.safeParseJSON(response) : response.json());
+            const res = await SmartAPI.get(`api/v1/reports/orders_drilldown.php?order_id=${orderId}`);
 
             if (res.success && res.data) {
                 const data = res.data;
@@ -527,7 +517,11 @@ const SmartReports = {
 
     // CSV Exporter Trigger
     exportReport(type) {
-        const url = `/api/v1/reports/export.php?type=${type}&format=csv&${this.getQueryString()}`;
+        const isSubdir = window.location.pathname.includes('/admin/') || window.location.pathname.includes('/manager/') ||
+                         window.location.pathname.includes('/reception/') || window.location.pathname.includes('/waiter/') ||
+                         window.location.pathname.includes('/kitchen/');
+        const prefix = isSubdir ? '../' : './';
+        const url = `${prefix}api/v1/reports/export.php?type=${type}&format=csv&${this.getQueryString()}`;
         window.location.href = url;
     },
 
@@ -564,3 +558,6 @@ const SmartReports = {
 document.addEventListener('DOMContentLoaded', () => {
     SmartReports.init();
 });
+
+window.SmartReports = SmartReports;
+

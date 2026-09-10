@@ -41,12 +41,17 @@ const SmartAPI = {
   },
 
   async request(endpoint, options = {}) {
-    let targetUrl = endpoint;
+    let targetUrl = endpoint || '';
+    if (targetUrl.startsWith('/api/v1/')) {
+      targetUrl = targetUrl.substring(1);
+    }
+
     const path = window.location.pathname;
     const isSubdir = path.includes('/public/') || path.includes('/php/') ||
                      path.includes('/admin/') || path.includes('/manager/') ||
                      path.includes('/reception/') || path.includes('/waiter/') ||
                      path.includes('/kitchen/');
+
     if (isSubdir && !targetUrl.startsWith('/') && !targetUrl.startsWith('http') && !targetUrl.startsWith('../')) {
       targetUrl = '../' + targetUrl;
     }

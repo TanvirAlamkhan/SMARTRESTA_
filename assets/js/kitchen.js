@@ -3,7 +3,7 @@
  * Module: SmartKitchen
  */
 
-const SmartKitchen = {
+var SmartKitchen = window.SmartKitchen || {
   activeTab: 'board',
   currentStationId: 0,
   allStations: [],

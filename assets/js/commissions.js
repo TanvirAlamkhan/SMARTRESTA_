@@ -3,7 +3,7 @@
  * Prompt 09 Compliance: Waiter Performance, Rules Engine, Approval Workflow & Payout Settlements
  */
 
-const SmartCommissions = {
+var SmartCommissions = window.SmartCommissions || {
     selectedCommissionIds: new Set(),
 
     /**
@@ -371,3 +371,5 @@ const SmartCommissions = {
         }
     }
 };
+
+window.SmartCommissions = SmartCommissions;

@@ -2,7 +2,7 @@
  * SMARTRESTA Toast Notification Engine
  */
 
-const SmartNotifications = {
+var SmartNotifications = window.SmartNotifications || {
   container: null,
 
   init() {

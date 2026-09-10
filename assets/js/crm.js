@@ -3,7 +3,7 @@
  * Prompt 14
  */
 
-const SmartCRM = {
+var SmartCRM = window.SmartCRM || {
   currentTab: 'customers',
 
   init: function() {
@@ -46,10 +46,9 @@ const SmartCRM = {
     if (!container) return;
     container.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:24px;">Loading customer database...</td></tr>`;
 
-    fetch(`/api/v1/crm/customers.php?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`)
-      .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.get(`api/v1/crm/customers.php?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`)
       .then(res => {
-        if (!res.success || !res.data.customers || res.data.customers.length === 0) {
+        if (!res.success || !res.data || !res.data.customers || res.data.customers.length === 0) {
           container.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:32px; color:#888;">No customers found.</td></tr>`;
           return;
         }
@@ -94,12 +93,7 @@ const SmartCRM = {
       notes: form.notes.value
     };
 
-    fetch('/api/v1/crm/customers.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/customers.php', data)
     .then(res => {
       if (res.success) {
         alert(res.message);
@@ -109,7 +103,7 @@ const SmartCRM = {
       } else {
         alert("Error: " + res.message);
       }
-    });
+    }).catch(err => alert("Error: " + err.message));
   },
 
   openCustomerProfileModal: function(id) {
@@ -120,8 +114,7 @@ const SmartCRM = {
     const content = document.getElementById('customer-profile-content');
     content.innerHTML = `<div class="text-center" style="padding:40px;">Loading customer profile...</div>`;
 
-    fetch(`/api/v1/crm/profile.php?id=${id}`)
-      .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.get(`api/v1/crm/profile.php?id=${id}`)
       .then(res => {
         if (!res.success) {
           content.innerHTML = `<div class="alert alert-danger">${res.message}</div>`;
@@ -241,10 +234,9 @@ const SmartCRM = {
     const dateFilter = document.getElementById('crm-res-date-filter')?.value || '';
     const statusFilter = document.getElementById('crm-res-status-filter')?.value || '';
 
-    fetch(`/api/v1/crm/reservations.php?reservation_date=${encodeURIComponent(dateFilter)}&status=${encodeURIComponent(statusFilter)}`)
-      .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.get(`api/v1/crm/reservations.php?reservation_date=${encodeURIComponent(dateFilter)}&status=${encodeURIComponent(statusFilter)}`)
       .then(res => {
-        if (!res.success || !res.data.reservations || res.data.reservations.length === 0) {
+        if (!res.success || !res.data || !res.data.reservations || res.data.reservations.length === 0) {
           container.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:32px; color:#888;">No reservations found.</td></tr>`;
           return;
         }
@@ -284,8 +276,7 @@ const SmartCRM = {
 
     if (!date || !time) return;
 
-    fetch(`/api/v1/crm/reservations.php?action=availability&reservation_date=${date}&reservation_time=${time}&guest_count=${guests}`)
-      .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.get(`api/v1/crm/reservations.php?action=availability&reservation_date=${date}&reservation_time=${time}&guest_count=${guests}`)
       .then(res => {
         if (res.success && res.data.is_available) {
           statusBox.className = 'alert alert-success';
@@ -309,12 +300,7 @@ const SmartCRM = {
       notes: document.getElementById('res-modal-notes').value
     };
 
-    fetch('/api/v1/crm/reservations.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/reservations.php', data)
     .then(res => {
       if (res.success) {
         alert(res.message);
@@ -329,12 +315,7 @@ const SmartCRM = {
   seatReservation: function(id) {
     if (!confirm("Seat this guest and convert reservation into active dining session?")) return;
 
-    fetch('/api/v1/crm/reservations.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'seat', reservation_id: id })
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/reservations.php', { action: 'seat', reservation_id: id })
     .then(res => {
       if (res.success) {
         alert("Guest seated! Dining session #" + res.data.dining_session_id + " opened on Table.");
@@ -349,12 +330,7 @@ const SmartCRM = {
     const reason = prompt("Enter cancellation reason:");
     if (reason === null) return;
 
-    fetch('/api/v1/crm/reservations.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'cancel', reservation_id: id, reason: reason })
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/reservations.php', { action: 'cancel', reservation_id: id, reason: reason })
     .then(res => {
       if (res.success) {
         alert("Reservation cancelled.");
@@ -376,12 +352,7 @@ const SmartCRM = {
     const reason = prompt("Enter mandatory audit reason for adjustment:");
     if (!reason) return;
 
-    fetch('/api/v1/crm/loyalty.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'adjust', customer_id: customerId, points: parseFloat(pts), reason: reason })
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/loyalty.php', { action: 'adjust', customer_id: customerId, points: parseFloat(pts), reason: reason })
     .then(res => {
       if (res.success) {
         alert("Points adjusted! New balance: " + res.data.balance_after + " pts");
@@ -398,10 +369,9 @@ const SmartCRM = {
     if (!container) return;
     container.innerHTML = `<tr><td colspan="7" class="text-center" style="padding:24px;">Loading coupons...</td></tr>`;
 
-    fetch('/api/v1/crm/coupons.php')
-      .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.get('api/v1/crm/coupons.php')
       .then(res => {
-        if (!res.success || !res.data.coupons || res.data.coupons.length === 0) {
+        if (!res.success || !res.data || !res.data.coupons || res.data.coupons.length === 0) {
           container.innerHTML = `<tr><td colspan="7" class="text-center" style="padding:32px; color:#888;">No coupons available.</td></tr>`;
           return;
         }
@@ -437,12 +407,7 @@ const SmartCRM = {
       valid_until: document.getElementById('cpn-modal-until').value
     };
 
-    fetch('/api/v1/crm/coupons.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/coupons.php', data)
     .then(res => {
       if (res.success) {
         alert("Coupon code created successfully.");
@@ -460,10 +425,9 @@ const SmartCRM = {
     if (!container) return;
     container.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:24px;">Loading QR ordering tables...</td></tr>`;
 
-    fetch('/api/v1/crm/qr.php')
-      .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.get('api/v1/crm/qr.php')
       .then(res => {
-        if (!res.success || !res.data.tables || res.data.tables.length === 0) {
+        if (!res.success || !res.data || !res.data.tables || res.data.tables.length === 0) {
           container.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:32px; color:#888;">No QR tables configured.</td></tr>`;
           return;
         }
@@ -503,12 +467,7 @@ const SmartCRM = {
   },
 
   generateQRToken: function(tableId) {
-    fetch('/api/v1/crm/qr.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'generate', table_id: tableId })
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/qr.php', { action: 'generate', table_id: tableId })
     .then(res => {
       if (res.success) {
         SmartCRM.loadQRTables();
@@ -520,12 +479,7 @@ const SmartCRM = {
 
   regenerateQRToken: function(tableId) {
     if (!confirm("Regenerating this QR token will revoke the old code. Proceed?")) return;
-    fetch('/api/v1/crm/qr.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'regenerate', table_id: tableId })
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/qr.php', { action: 'regenerate', table_id: tableId })
     .then(res => {
       if (res.success) {
         SmartCRM.loadQRTables();
@@ -537,12 +491,7 @@ const SmartCRM = {
 
   revokeQRToken: function(tokenId) {
     if (!confirm("Revoke public access for this table QR code?")) return;
-    fetch('/api/v1/crm/qr.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'revoke', token_id: tokenId })
-    })
-    .then(res => SmartAPI.safeParseJSON(res))
+    SmartAPI.post('api/v1/crm/qr.php', { action: 'revoke', token_id: tokenId })
     .then(res => {
       if (res.success) {
         SmartCRM.loadQRTables();
@@ -558,3 +507,5 @@ document.addEventListener('DOMContentLoaded', () => {
     SmartCRM.init();
   }
 });
+
+window.SmartCRM = SmartCRM;

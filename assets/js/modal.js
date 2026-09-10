@@ -2,7 +2,7 @@
  * SMARTRESTA Reusable Modal & Drawer Controller
  */
 
-const SmartModal = {
+var SmartModal = window.SmartModal || {
   open(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {

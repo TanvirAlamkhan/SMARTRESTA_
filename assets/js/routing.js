@@ -3,7 +3,7 @@
  * Prompt 07: Smart Order Routing Engine, Multi-Station Dispatch & Item-Level Routing
  */
 
-const SmartRouting = {
+var SmartRouting = window.SmartRouting || {
   stations: [],
 
   async init() {
@@ -230,3 +230,5 @@ const SmartRouting = {
 document.addEventListener('DOMContentLoaded', () => {
   SmartRouting.init();
 });
+
+window.SmartRouting = SmartRouting;

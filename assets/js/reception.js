@@ -3,7 +3,7 @@
  * Module: SmartReception
  */
 
-const SmartReception = {
+var SmartReception = window.SmartReception || {
   activeTab: 'bills',
   allBills: [],
   allReservations: [],
@@ -385,9 +385,9 @@ const SmartReception = {
     if (!tbody) return;
 
     try {
-      const res = await SmartAPI.get('api/v1/crm/index.php');
+      const res = await SmartAPI.get('api/v1/crm/customers.php');
       if (res.success && res.data) {
-        this.allCustomers = res.data;
+        this.allCustomers = Array.isArray(res.data) ? res.data : (res.data.customers || []);
         this.renderCustomers(this.allCustomers);
       } else {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No customer profiles registered.</td></tr>`;
