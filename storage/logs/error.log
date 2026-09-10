@@ -1,0 +1,5 @@
+[2026-09-10T04:31:49+00:00] [ERROR] [req:5ad63cb01beba911] [user:guest] [branch:1] 500 Server Error: Database connection unavailable. Please start MySQL service in XAMPP or check database settings. {"data":null,"errors":null}
+[2026-09-10T04:31:54+00:00] [ERROR] [req:1c40f759cd2883db] [user:guest] [branch:1] 500 Server Error: Database connection unavailable. Please start MySQL service in XAMPP or check database settings. {"data":null,"errors":null}
+[2026-09-10T04:31:57+00:00] [ERROR] [req:fc78539dca518fc0] [user:guest] [branch:1] 500 Server Error: Database connection unavailable. Please start MySQL service in XAMPP or check database settings. {"data":null,"errors":null}
+[2026-09-10T04:32:18+00:00] [ERROR] [req:909337a52b01dc7d] [user:guest] [branch:1] 500 Server Error: Database connection unavailable. Please start MySQL service in XAMPP or check database settings. {"data":null,"errors":null}
+[2026-09-10T04:32:29+00:00] [ERROR] [req:fb5dfa12a6a4ef26] [user:guest] [branch:1] 500 Server Error: Database connection unavailable. Please start MySQL service in XAMPP or check database settings. {"data":null,"errors":null}
