@@ -461,6 +461,50 @@ $assetPrefix = $isPhpSubdir ? '../' : './';
   </div>
 </div>
 
+<!-- Modal: Create Staff User Account -->
+<div id="create-user-modal" class="modal-backdrop">
+  <div class="modal-content" style="max-width:520px;">
+    <div class="modal-header">
+      <h3>Create Staff Account</h3>
+      <button class="btn btn-secondary btn-sm" onclick="SmartModal.close('create-user-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" id="new-user-name" class="form-control" placeholder="e.g. Salim Khan" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address (Login ID) *</label>
+        <input type="email" id="new-user-email" class="form-control" placeholder="salim@smartresta.com" required>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <input type="password" id="new-user-password" class="form-control" placeholder="••••••••" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" id="new-user-phone" class="form-control" placeholder="01700000000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Assigned Staff Role *</label>
+        <select id="new-user-role" class="form-control" required>
+          <option value="admin">Admin (Full System Access)</option>
+          <option value="manager">Manager (Operations & Finance)</option>
+          <option value="reception">Reception / Cashier (Billing & Front Desk)</option>
+          <option value="waiter" selected>Waiter (POS & Floor Ordering)</option>
+          <option value="kitchen">Kitchen Staff (KDS & Production)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="SmartModal.close('create-user-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCreateUser()">Create User Account</button>
+    </div>
+  </div>
+</div>
+
 
     </div>
   </main>
@@ -2333,9 +2377,66 @@ document.addEventListener('DOMContentLoaded', () => {
   try { if (typeof loadActiveOrders === 'function') loadActiveOrders(); } catch (e) {}
   if (['admin', 'manager'].includes(window.CURRENT_PORTAL)) {
     try { if (typeof loadWaiterMatrix === 'function') loadWaiterMatrix(); } catch (e) {}
+    try { if (typeof loadUsersList === 'function') loadUsersList(); } catch (e) {}
   }
 });
-});
+
+async function loadUsersList() {
+  const tbody = document.getElementById('users-table-tbody');
+  if (!tbody) return;
+  try {
+    const res = await SmartAPI.get('api/v1/users/index.php');
+    if (res.data && res.data.length > 0) {
+      tbody.innerHTML = res.data.map(u => `
+        <tr>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.email}</td>
+          <td>${u.phone || 'N/A'}</td>
+          <td><span class="badge badge-info">${(u.role || 'staff').toUpperCase()}</span></td>
+          <td><small class="text-muted">${u.last_login || 'Never'}</small></td>
+          <td><span class="badge ${u.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">${u.status}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="alert('User account #${u.id} active')">Status</button>
+          </td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-muted);">No staff accounts found.</td></tr>`;
+    }
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--danger);">Failed to load users from database.</td></tr>`;
+  }
+}
+
+async function submitCreateUser() {
+  const name = document.getElementById('new-user-name').value.trim();
+  const email = document.getElementById('new-user-email').value.trim();
+  const password = document.getElementById('new-user-password').value;
+  const role = document.getElementById('new-user-role').value;
+  const phone = document.getElementById('new-user-phone').value.trim();
+
+  if (!name || !email || !password) {
+    SmartNotifications.show('Name, Email, and Password are required', 'warning');
+    return;
+  }
+
+  try {
+    const res = await SmartAPI.post('api/v1/users/create.php', { name, email, password, role, phone });
+    if (res.success) {
+      SmartNotifications.show(`User account created for ${name} (${role.toUpperCase()})!`, 'success');
+      SmartModal.close('create-user-modal');
+      document.getElementById('new-user-name').value = '';
+      document.getElementById('new-user-email').value = '';
+      document.getElementById('new-user-password').value = '';
+      document.getElementById('new-user-phone').value = '';
+      loadUsersList();
+    } else {
+      SmartNotifications.show(res.message || 'Failed to create user account', 'danger');
+    }
+  } catch (err) {
+    SmartNotifications.show(err.message || 'Failed to create user account', 'danger');
+  }
+}
 
 
 // ==========================================

@@ -462,9 +462,9 @@ $currentUser = Auth::user();
   <p>An enterprise-grade, zero-mock restaurant management platform. Powering multi-counter order routing, floor table management, waiter commissions, kitchen production (KDS), recipe BOM inventory costing, and real-time financial reporting.</p>
 
   <div class="hero-buttons">
-    <a href="<?= $isLoggedIn ? 'index.php' : 'public/login.php' ?>" class="btn-hero-primary">🚀 Launch Management App</a>
-    <a href="public/login.php" class="btn-hero-secondary">🔐 Staff Login Portal</a>
-    <a href="public/qr.html" class="btn-hero-secondary" target="_blank">📱 Customer QR Menu</a>
+    <a href="public/menu.php" class="btn-hero-primary">🍕 View Online Menu & Order</a>
+    <a href="<?= $isLoggedIn ? 'admin/' : 'public/login.php' ?>" class="btn-hero-secondary">🚀 Staff & Management Portal</a>
+    <a href="public/login.php" class="btn-hero-secondary">🔐 Staff Sign In</a>
   </div>
 </section>
 
